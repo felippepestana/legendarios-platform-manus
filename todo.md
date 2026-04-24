@@ -20,7 +20,10 @@
 ## Sugestão 3: Seção de Preços e Checkout
 - [x] Criar seção de preços com opções Pix (R$1.790) e Cartão (10x R$199)
 - [x] Design de cards de preço com badges e CTAs direcionando ao formulário
-- [ ] Integrar Stripe para processamento real de pagamentos (requer chave Stripe do usuário)
+- [x] Integrar Stripe para processamento real de pagamentos (checkout sessions, webhook, páginas sucesso/cancelado)
+- [x] Corrigir payment_method_types para Pix (usar 'pix' ao invés de 'boleto')
+- [x] Adicionar teste do webhook Stripe (verificação de assinatura e test event)
+- [x] Validar que o frontend de checkout compila sem erros (0 TS errors, server running)
 
 ## Testes
 - [x] Testes vitest para criação de leads (validação de dados)
@@ -31,4 +34,4 @@
 ## Melhorias pendentes
 - [x] Remover fallback hardcoded de depoimentos e usar apenas estados loading/empty/error do banco
 - [x] Criar script de seed reproduzível versionado no projeto (scripts/seed-testimonials.mjs)
-- [ ] Tornar testes de testimonials determinísticos com setup/teardown
+- [x] Tornar testes de testimonials determinísticos com mocks/setup-teardown no leads.test.ts

@@ -867,6 +867,30 @@ function ComparisonSection() {
 
 // ─── Pricing / Checkout Section ────────────────────────────
 function CheckoutSection() {
+  const createSession = trpc.checkout.createSession.useMutation();
+  const [loadingMethod, setLoadingMethod] = useState<"pix" | "card" | null>(null);
+
+  const handleCheckout = async (paymentMethod: "pix" | "card") => {
+    setLoadingMethod(paymentMethod);
+    try {
+      const result = await createSession.mutateAsync({
+        paymentMethod,
+        origin: window.location.origin,
+      });
+      if (result.url) {
+        toast.success("Redirecionando para o checkout...");
+        window.open(result.url, "_blank");
+      } else {
+        toast.error("Erro ao criar sessão de pagamento. Tente novamente.");
+      }
+    } catch (error: any) {
+      console.error("Checkout error:", error);
+      toast.error(error?.message || "Erro ao processar pagamento. Tente novamente.");
+    } finally {
+      setLoadingMethod(null);
+    }
+  };
+
   return (
     <section id="checkout" className="py-24 md:py-32 relative">
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-forge-gold/20 to-transparent" />
@@ -922,12 +946,17 @@ function CheckoutSection() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#inscricao"
-                className="block w-full text-center py-4 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 font-semibold hover:bg-green-500/30 transition-all"
+              <button
+                onClick={() => handleCheckout("pix")}
+                disabled={loadingMethod !== null}
+                className="block w-full text-center py-4 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 font-semibold hover:bg-green-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Pagar com Pix
-              </a>
+                {loadingMethod === "pix" ? (
+                  <><Loader2 className="w-4 h-4 inline mr-2 animate-spin" />Processando...</>
+                ) : (
+                  "Pagar com Pix"
+                )}
+              </button>
             </div>
           </FadeIn>
 
@@ -963,20 +992,24 @@ function CheckoutSection() {
                   </li>
                 ))}
               </ul>
-              <a
-                href="#inscricao"
-                className="block w-full text-center py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold hover:brightness-110 transition-all forge-glow"
+              <button
+                onClick={() => handleCheckout("card")}
+                disabled={loadingMethod !== null}
+                className="block w-full text-center py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold hover:brightness-110 transition-all forge-glow disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <CreditCard className="w-4 h-4 inline mr-2" />
-                Pagar com Cartão
-              </a>
+                {loadingMethod === "card" ? (
+                  <><Loader2 className="w-4 h-4 inline mr-2 animate-spin" />Processando...</>
+                ) : (
+                  <><CreditCard className="w-4 h-4 inline mr-2" />Pagar com Cartão</>
+                )}
+              </button>
             </div>
           </FadeIn>
         </div>
 
         <FadeIn delay={0.3}>
           <p className="text-center text-white/30 text-xs mt-8 max-w-lg mx-auto">
-            Pagamento processado com segurança. Ao realizar a inscrição, você concorda com os termos
+            Pagamento processado com segurança via Stripe. Ao realizar a inscrição, você concorda com os termos
             de participação do TOP Destemidos Pioneiros e com a Política de Privacidade (LGPD).
           </p>
         </FadeIn>

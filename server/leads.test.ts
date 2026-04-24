@@ -1,8 +1,74 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
 type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
+
+// Mock db functions for deterministic tests
+vi.mock("./db", () => {
+  const testimonials = [
+    {
+      id: 1,
+      name: "Carlos Eduardo",
+      city: "Porto Velho/RO",
+      event: "TOP Destemidos Pioneiros",
+      quote: "O TOP mudou completamente minha perspectiva como homem.",
+      avatarUrl: null,
+      rating: 5,
+      featured: 1,
+      createdAt: new Date("2025-01-01"),
+    },
+    {
+      id: 2,
+      name: "Marcos Antônio",
+      city: "Balneário Camboriú/SC",
+      event: "TOP Vale Europeu",
+      quote: "Participar do TOP foi a decisão mais corajosa que já tomei.",
+      avatarUrl: null,
+      rating: 5,
+      featured: 1,
+      createdAt: new Date("2025-01-02"),
+    },
+    {
+      id: 3,
+      name: "Rafael Mendes",
+      city: "Porto Velho/RO",
+      event: "TOP Destemidos Pioneiros",
+      quote: "Cheguei ao TOP achando que era só uma trilha.",
+      avatarUrl: null,
+      rating: 4,
+      featured: 0,
+      createdAt: new Date("2025-01-03"),
+    },
+  ];
+
+  return {
+    createLead: vi.fn().mockImplementation((input: any) => {
+      return Promise.resolve({ id: 1, ...input, status: "new", createdAt: new Date(), updatedAt: new Date() });
+    }),
+    getLeads: vi.fn().mockResolvedValue([
+      { id: 1, name: "Test Lead", email: "test@test.com", whatsapp: "69999999999", city: "Porto Velho/RO", event: "TOP Destemidos Pioneiros", status: "new", createdAt: new Date(), updatedAt: new Date() },
+    ]),
+    getFeaturedTestimonials: vi.fn().mockResolvedValue(
+      testimonials.filter((t) => t.featured === 1)
+    ),
+    getAllTestimonials: vi.fn().mockResolvedValue(testimonials),
+    createTestimonial: vi.fn().mockResolvedValue(undefined),
+  };
+});
+
+// Mock notification to avoid real calls
+vi.mock("./_core/notification", () => ({
+  notifyOwner: vi.fn().mockResolvedValue(true),
+}));
+
+// Mock stripe to avoid real calls
+vi.mock("./stripe", () => ({
+  createCheckoutSession: vi.fn().mockResolvedValue({
+    url: "https://checkout.stripe.com/test",
+    sessionId: "cs_test_123",
+  }),
+}));
 
 function createPublicContext(): TrpcContext {
   return {
@@ -28,6 +94,7 @@ function createAuthContext(): TrpcContext {
     createdAt: new Date(),
     updatedAt: new Date(),
     lastSignedIn: new Date(),
+    stripeCustomerId: null,
   };
 
   return {
@@ -42,6 +109,10 @@ function createAuthContext(): TrpcContext {
   };
 }
 
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe("leads.create", () => {
   it("creates a lead with valid data", async () => {
     const ctx = createPublicContext();
@@ -49,7 +120,7 @@ describe("leads.create", () => {
 
     const result = await caller.leads.create({
       name: "Test User",
-      email: `test-${Date.now()}@example.com`,
+      email: "test@example.com",
       whatsapp: "69999999999",
       city: "Porto Velho/RO",
       event: "TOP Destemidos Pioneiros",
@@ -57,6 +128,7 @@ describe("leads.create", () => {
 
     expect(result).toHaveProperty("success", true);
     expect(result).toHaveProperty("lead");
+    expect(result.lead).toHaveProperty("name", "Test User");
   });
 
   it("rejects invalid email", async () => {
@@ -91,21 +163,22 @@ describe("leads.create", () => {
 });
 
 describe("testimonials.featured", () => {
-  it("returns an array of featured testimonials", async () => {
+  it("returns only featured testimonials", async () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);
 
     const result = await caller.testimonials.featured();
 
     expect(Array.isArray(result)).toBe(true);
-    if (result.length > 0) {
-      expect(result[0]).toHaveProperty("name");
-      expect(result[0]).toHaveProperty("quote");
-      expect(result[0]).toHaveProperty("city");
-      expect(result[0]).toHaveProperty("event");
-      expect(result[0]).toHaveProperty("rating");
-      expect(result[0].featured).toBe(1);
-    }
+    expect(result).toHaveLength(2);
+    result.forEach((t: any) => {
+      expect(t.featured).toBe(1);
+      expect(t).toHaveProperty("name");
+      expect(t).toHaveProperty("quote");
+      expect(t).toHaveProperty("city");
+      expect(t).toHaveProperty("event");
+      expect(t).toHaveProperty("rating");
+    });
   });
 });
 
@@ -117,7 +190,7 @@ describe("testimonials.all", () => {
     const result = await caller.testimonials.all();
 
     expect(Array.isArray(result)).toBe(true);
-    expect(result.length).toBeGreaterThanOrEqual(6); // We seeded 6
+    expect(result).toHaveLength(3);
   });
 });
 
@@ -135,5 +208,6 @@ describe("leads.list (protected)", () => {
 
     const result = await caller.leads.list();
     expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
   });
 });

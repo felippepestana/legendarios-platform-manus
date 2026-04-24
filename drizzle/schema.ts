@@ -20,6 +20,7 @@ export const users = mysqlTable("users", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
+  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
 });
 
 export type User = typeof users.$inferSelect;
@@ -53,3 +54,23 @@ export const testimonials = mysqlTable("testimonials", {
   featured: int("featured").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
+
+// Orders table - tracks Stripe checkout sessions
+export const orders = mysqlTable("orders", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId"),
+  leadId: int("leadId"),
+  stripeSessionId: varchar("stripeSessionId", { length: 255 }).notNull().unique(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  event: varchar("event", { length: 100 }).default("TOP Destemidos Pioneiros").notNull(),
+  paymentMethod: mysqlEnum("paymentMethod", ["pix", "card"]).notNull(),
+  status: mysqlEnum("orderStatus", ["pending", "paid", "failed", "refunded"]).default("pending").notNull(),
+  amountCents: int("amountCents").notNull(),
+  customerName: varchar("customerName", { length: 255 }),
+  customerEmail: varchar("customerEmail", { length: 320 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = typeof orders.$inferInsert;

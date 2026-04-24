@@ -4,6 +4,8 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { createLead, getLeads, getFeaturedTestimonials, getAllTestimonials, createTestimonial } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { createCheckoutSession } from "./stripe";
+import { PRODUCTS } from "./stripe-products";
 import { z } from "zod";
 
 export const appRouter = router({
@@ -47,6 +49,35 @@ export const appRouter = router({
     list: protectedProcedure.query(async () => {
       return getLeads();
     }),
+  }),
+
+  checkout: router({
+    createSession: publicProcedure
+      .input(
+        z.object({
+          paymentMethod: z.enum(["pix", "card"]),
+          customerName: z.string().optional(),
+          customerEmail: z.string().email().optional(),
+          origin: z.string(),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const product = input.paymentMethod === "pix" ? PRODUCTS.TOP_PIX : PRODUCTS.TOP_CARD;
+
+        const result = await createCheckoutSession({
+          productName: product.name,
+          description: product.description,
+          amountCents: product.amountCents,
+          currency: product.currency,
+          paymentMethod: input.paymentMethod,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          userId: ctx.user?.id,
+          origin: input.origin,
+        });
+
+        return result;
+      }),
   }),
 
   testimonials: router({

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1777038195677,
+      "tag": "0000_cultured_caretaker",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1777038296816,
+      "tag": "0001_ancient_spirit",
+      "breakpoints": true
+    }
+  ]
+}

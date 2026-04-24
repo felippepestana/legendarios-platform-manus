@@ -29,8 +29,13 @@ import {
   Star,
   Menu,
   X,
+  Quote,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 // ─── Image URLs ────────────────────────────────────────────
 const IMAGES = {
@@ -102,8 +107,8 @@ function Navbar() {
   const links = [
     { label: "O Movimento", href: "#movimento" },
     { label: "Eventos", href: "#eventos" },
+    { label: "Depoimentos", href: "#depoimentos" },
     { label: "Plataforma", href: "#plataforma" },
-    { label: "Roadmap", href: "#roadmap" },
     { label: "Inscreva-se", href: "#inscricao" },
   ];
 
@@ -198,14 +203,13 @@ function HeroSection() {
           className="w-full h-full object-cover"
         />
         <div className="cinematic-overlay absolute inset-0" />
-        {/* Extra bottom gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0C0C0E] to-transparent" />
       </div>
 
       <div className="relative z-10 container text-center px-4 pt-20">
         <FadeIn>
           <p className="text-forge-gold font-semibold tracking-[0.3em] uppercase text-xs md:text-sm mb-6">
-            Movimento Global de Transformação Masculina
+            TOP Destemidos Pioneiros — Porto Velho/RO
           </p>
         </FadeIn>
 
@@ -236,7 +240,7 @@ function HeroSection() {
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold text-base hover:brightness-110 transition-all forge-glow"
             >
               <Flame className="w-5 h-5" />
-              Inscreva-se no TOP
+              Inscreva-se no TOP Destemidos Pioneiros
             </a>
             <a
               href="#plataforma"
@@ -369,13 +373,13 @@ function MovementSection() {
 function EventsSection() {
   const events = [
     {
-      name: "TOP",
-      full: "Track Outdoor de Potencial",
+      name: "TOP Destemidos Pioneiros",
+      full: "Track Outdoor de Potencial — Porto Velho/RO",
       audience: "Homens",
       duration: "4 dias (72h)",
       image: IMAGES.top,
       description:
-        "Uma experiência imersiva de 72 horas na natureza, onde homens enfrentam desafios físicos, espirituais e emocionais para alcançar seu potencial máximo. O TOP é o coração do Movimento Legendários.",
+        "Uma experiência imersiva de 72 horas na natureza amazônica, onde homens enfrentam desafios físicos, espirituais e emocionais para alcançar seu potencial máximo. O TOP Destemidos Pioneiros é o coração do Movimento Legendários em Porto Velho.",
       icon: Mountain,
       highlight: true,
     },
@@ -405,7 +409,6 @@ function EventsSection() {
 
   return (
     <section id="eventos" className="py-24 md:py-32 relative">
-      {/* Subtle divider */}
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-forge-gold/20 to-transparent" />
 
       <div className="container">
@@ -433,7 +436,6 @@ function EventsSection() {
                     : "border-white/[0.06] hover:border-white/15"
                 }`}
               >
-                {/* Image */}
                 <div className="relative h-56 overflow-hidden">
                   <img
                     src={ev.image}
@@ -454,12 +456,11 @@ function EventsSection() {
                   </div>
                 </div>
 
-                {/* Content */}
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-3">
                     <ev.icon className="w-5 h-5 text-forge-gold" />
                     <h3
-                      className="text-2xl font-bold text-white"
+                      className="text-xl font-bold text-white"
                       style={{ fontFamily: "'Playfair Display', serif" }}
                     >
                       {ev.name}
@@ -497,7 +498,7 @@ function EventsSection() {
                   className="text-2xl md:text-3xl font-bold text-white mb-4"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  TOP — Destemidos Pioneiros
+                  TOP Destemidos Pioneiros — Porto Velho/RO
                 </h3>
                 <p className="text-white/70 leading-relaxed mb-4">
                   Porto Velho/RO é uma das sedes mais ativas do Brasil, com múltiplos eventos
@@ -526,6 +527,166 @@ function EventsSection() {
             </div>
           </div>
         </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// ─── Testimonials Section (from database) ──────────────────
+function TestimonialsSection() {
+  const { data: testimonials, isLoading, isError } = trpc.testimonials.featured.useQuery();
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  // Auto-rotate testimonials
+  useEffect(() => {
+    if (!testimonials || testimonials.length === 0) return;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [testimonials]);
+
+  const displayTestimonials = testimonials ?? [];
+
+  return (
+    <section id="depoimentos" className="py-24 md:py-32 relative overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-forge-gold/20 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-forge-gold/[0.02] to-transparent" />
+
+      <div className="container relative z-10">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <p className="text-forge-gold font-semibold tracking-[0.2em] uppercase text-xs mb-4">
+              Vidas Transformadas
+            </p>
+            <h2
+              className="text-3xl md:text-5xl font-bold text-white"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              Depoimentos de{" "}
+              <span className="text-forge-gradient">Legendários</span>
+            </h2>
+          </div>
+        </FadeIn>
+
+        {/* Loading state */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-8 h-8 text-forge-gold animate-spin" />
+            <span className="ml-3 text-white/50">Carregando depoimentos...</span>
+          </div>
+        )}
+
+        {/* Error state */}
+        {isError && (
+          <div className="flex items-center justify-center py-16">
+            <AlertCircle className="w-8 h-8 text-forge-ember" />
+            <span className="ml-3 text-white/50">Erro ao carregar depoimentos. Tente novamente mais tarde.</span>
+          </div>
+        )}
+
+        {/* Empty state */}
+        {!isLoading && !isError && displayTestimonials.length === 0 && (
+          <div className="text-center py-16">
+            <Quote className="w-12 h-12 text-forge-gold/20 mx-auto mb-4" />
+            <p className="text-white/40">Depoimentos em breve.</p>
+          </div>
+        )}
+
+        {/* Featured testimonial carousel */}
+        {!isLoading && !isError && displayTestimonials.length > 0 && (
+        <>
+        <FadeIn delay={0.15}>
+          <div className="max-w-4xl mx-auto mb-16">
+            <AnimatePresence mode="wait">
+              {displayTestimonials[activeIndex] && (
+                <motion.div
+                  key={activeIndex}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-center"
+                >
+                  <Quote className="w-12 h-12 text-forge-gold/30 mx-auto mb-6" />
+                  <blockquote>
+                    <p
+                      className="text-xl md:text-3xl font-medium text-white leading-relaxed italic mb-8"
+                      style={{ fontFamily: "'Playfair Display', serif" }}
+                    >
+                      "{displayTestimonials[activeIndex].quote}"
+                    </p>
+                  </blockquote>
+
+                  {/* Avatar + info */}
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="w-14 h-14 rounded-full bg-forge-gold/20 border-2 border-forge-gold/40 flex items-center justify-center">
+                      <span className="text-forge-gold font-bold text-lg" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        {displayTestimonials[activeIndex].name.charAt(0)}
+                      </span>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-white font-semibold">{displayTestimonials[activeIndex].name}</p>
+                      <p className="text-white/50 text-sm">{displayTestimonials[activeIndex].event}</p>
+                      <p className="text-forge-gold/70 text-xs">{displayTestimonials[activeIndex].city}</p>
+                    </div>
+                  </div>
+
+                  {/* Star rating */}
+                  <div className="flex items-center justify-center gap-1 mt-4">
+                    {Array.from({ length: displayTestimonials[activeIndex].rating }).map((_, i) => (
+                      <Star key={i} className="w-4 h-4 text-forge-gold fill-forge-gold" />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Dots navigation */}
+            <div className="flex items-center justify-center gap-2 mt-8">
+              {displayTestimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    i === activeIndex
+                      ? "bg-forge-gold w-8"
+                      : "bg-white/20 hover:bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </FadeIn>
+
+        {/* Grid of smaller testimonials */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {displayTestimonials.slice(0, 6).map((t, i) => (
+            <FadeIn key={t.id || i} delay={i * 0.1}>
+              <div className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-forge-gold/20 transition-all duration-500 h-full">
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: t.rating }).map((_, j) => (
+                    <Star key={j} className="w-3.5 h-3.5 text-forge-gold fill-forge-gold" />
+                  ))}
+                </div>
+                <p className="text-white/70 text-sm leading-relaxed italic mb-4">
+                  "{t.quote.length > 150 ? t.quote.substring(0, 150) + "..." : t.quote}"
+                </p>
+                <div className="flex items-center gap-3 mt-auto">
+                  <div className="w-10 h-10 rounded-full bg-forge-gold/15 border border-forge-gold/30 flex items-center justify-center">
+                    <span className="text-forge-gold font-bold text-sm">{t.name.charAt(0)}</span>
+                  </div>
+                  <div>
+                    <p className="text-white text-sm font-medium">{t.name}</p>
+                    <p className="text-white/40 text-xs">{t.city}</p>
+                  </div>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+        </>
+        )}
       </div>
     </section>
   );
@@ -567,7 +728,7 @@ function PlatformSection() {
     {
       icon: Target,
       title: "CRM de Eventos",
-      desc: "Perfis detalhados rastreando a jornada completa: do primeiro TOP ao REM, LEGADO e TOP Master.",
+      desc: "Perfis detalhados rastreando a jornada completa: do primeiro TOP Destemidos Pioneiros ao REM, LEGADO e TOP Master.",
     },
     {
       icon: Zap,
@@ -704,6 +865,126 @@ function ComparisonSection() {
   );
 }
 
+// ─── Pricing / Checkout Section ────────────────────────────
+function CheckoutSection() {
+  return (
+    <section id="checkout" className="py-24 md:py-32 relative">
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-forge-gold/20 to-transparent" />
+
+      <div className="container">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <p className="text-forge-gold font-semibold tracking-[0.2em] uppercase text-xs mb-4">
+              Investimento na Sua Transformação
+            </p>
+            <h2
+              className="text-3xl md:text-5xl font-bold text-white"
+              style={{ fontFamily: "'Playfair Display', serif" }}
+            >
+              TOP Destemidos Pioneiros — Porto Velho/RO
+            </h2>
+            <p className="text-white/60 mt-4 max-w-2xl mx-auto">
+              Escolha a forma de pagamento que melhor se adapta a você. Vagas limitadas por edição.
+            </p>
+          </div>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {/* Option 1: Pix */}
+          <FadeIn delay={0.1}>
+            <div className="relative p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-forge-gold/30 transition-all duration-500">
+              <div className="absolute -top-3 left-8">
+                <span className="px-4 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold uppercase tracking-wider border border-green-500/30">
+                  Melhor Preço
+                </span>
+              </div>
+              <div className="mt-4 mb-6">
+                <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Pagamento via Pix
+                </h3>
+                <p className="text-white/50 text-sm">Desconto especial para pagamento à vista</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-white/40 text-sm line-through">R$ 1.990,00</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-forge-gold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    R$ 1.790
+                  </span>
+                  <span className="text-white/50 text-sm">,00</span>
+                </div>
+                <p className="text-green-400 text-sm font-medium mt-1">Economia de R$ 200,00</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {["Confirmação imediata", "Vaga garantida", "Kit do participante incluso", "Alimentação durante o evento"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="#inscricao"
+                className="block w-full text-center py-4 rounded-lg bg-green-500/20 border border-green-500/40 text-green-400 font-semibold hover:bg-green-500/30 transition-all"
+              >
+                Pagar com Pix
+              </a>
+            </div>
+          </FadeIn>
+
+          {/* Option 2: Card */}
+          <FadeIn delay={0.2}>
+            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-forge-gold/[0.06] to-transparent border border-forge-gold/20 hover:border-forge-gold/40 transition-all duration-500">
+              <div className="absolute -top-3 left-8">
+                <span className="px-4 py-1 rounded-full bg-forge-gold text-[#0C0C0E] text-xs font-bold uppercase tracking-wider">
+                  Mais Popular
+                </span>
+              </div>
+              <div className="mt-4 mb-6">
+                <h3 className="text-xl font-bold text-white mb-1" style={{ fontFamily: "'Playfair Display', serif" }}>
+                  Cartão de Crédito
+                </h3>
+                <p className="text-white/50 text-sm">Parcele em até 10x sem juros</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-white/40 text-sm">10x de</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-forge-gold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    R$ 199
+                  </span>
+                  <span className="text-white/50 text-sm">,00</span>
+                </div>
+                <p className="text-white/40 text-sm mt-1">ou R$ 1.990,00 à vista no cartão</p>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {["Parcelamento sem juros", "Vaga garantida", "Kit do participante incluso", "Alimentação durante o evento"].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-white/60">
+                    <CheckCircle2 className="w-4 h-4 text-forge-gold shrink-0" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="#inscricao"
+                className="block w-full text-center py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold hover:brightness-110 transition-all forge-glow"
+              >
+                <CreditCard className="w-4 h-4 inline mr-2" />
+                Pagar com Cartão
+              </a>
+            </div>
+          </FadeIn>
+        </div>
+
+        <FadeIn delay={0.3}>
+          <p className="text-center text-white/30 text-xs mt-8 max-w-lg mx-auto">
+            Pagamento processado com segurança. Ao realizar a inscrição, você concorda com os termos
+            de participação do TOP Destemidos Pioneiros e com a Política de Privacidade (LGPD).
+          </p>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
 // ─── Roadmap Section ───────────────────────────────────────
 function RoadmapSection() {
   const phases = [
@@ -773,7 +1054,6 @@ function RoadmapSection() {
         </FadeIn>
 
         <div className="relative">
-          {/* Vertical line */}
           <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-forge-gold/40 via-forge-gold/20 to-transparent" />
 
           <div className="space-y-12 md:space-y-0">
@@ -782,7 +1062,6 @@ function RoadmapSection() {
                 <div className={`md:grid md:grid-cols-2 md:gap-12 mb-12 ${i % 2 === 1 ? "md:direction-rtl" : ""}`}>
                   <div className={`${i % 2 === 1 ? "md:col-start-2" : ""}`}>
                     <div className="relative p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-forge-gold/20 transition-all duration-500">
-                      {/* Phase badge */}
                       <div className="flex items-center gap-3 mb-4">
                         <span className="px-3 py-1 rounded-full bg-forge-gold text-[#0C0C0E] text-xs font-bold uppercase tracking-wider">
                           {p.phase}
@@ -806,7 +1085,6 @@ function RoadmapSection() {
                         ))}
                       </ul>
 
-                      {/* Connector dot */}
                       <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-forge-gold border-4 border-[#0C0C0E] z-10"
                         style={{ [i % 2 === 0 ? "right" : "left"]: "-2.15rem" }}
                       />
@@ -822,7 +1100,7 @@ function RoadmapSection() {
   );
 }
 
-// ─── Testimonial / Quote Section ───────────────────────────
+// ─── Quote Section ─────────────────────────────────────────
 function QuoteSection() {
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
@@ -855,14 +1133,30 @@ function QuoteSection() {
   );
 }
 
-// ─── CTA / Inscription Section ─────────────────────────────
+// ─── CTA / Inscription Section (connected to API) ─────────
 function InscriptionSection() {
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "", city: "porto-velho" });
+  const [formData, setFormData] = useState({ name: "", email: "", phone: "", city: "Porto Velho/RO" });
   const [submitted, setSubmitted] = useState(false);
+
+  const createLead = trpc.leads.create.useMutation({
+    onSuccess: () => {
+      setSubmitted(true);
+      toast.success("Inscrição recebida com sucesso!");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Erro ao enviar inscrição. Tente novamente.");
+    },
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    createLead.mutate({
+      name: formData.name,
+      email: formData.email,
+      whatsapp: formData.phone,
+      city: formData.city,
+      event: "TOP Destemidos Pioneiros",
+    });
   };
 
   return (
@@ -881,8 +1175,8 @@ function InscriptionSection() {
                   className="text-3xl md:text-4xl font-bold text-white leading-tight mb-6"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  Inscreva-se no Próximo{" "}
-                  <span className="text-forge-gradient">TOP</span>
+                  Inscreva-se no{" "}
+                  <span className="text-forge-gradient">TOP Destemidos Pioneiros</span>
                 </h2>
                 <p className="text-white/70 leading-relaxed mb-6">
                   Preencha o formulário e nossa equipe entrará em contato para
@@ -891,7 +1185,7 @@ function InscriptionSection() {
 
                 <div className="space-y-4">
                   {[
-                    { icon: Calendar, text: "Próximo TOP: 30/07 a 02/08 de 2026" },
+                    { icon: Calendar, text: "Próximo TOP Destemidos Pioneiros: 30/07 a 02/08 de 2026" },
                     { icon: MapPin, text: "Track Destemidos Pioneiros — Porto Velho/RO" },
                     { icon: CreditCard, text: "Parcelamento em até 10x no cartão" },
                   ].map((item, i) => (
@@ -961,21 +1255,38 @@ function InscriptionSection() {
                         onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                         className="w-full px-4 py-3 rounded-lg bg-white/[0.05] border border-white/[0.1] text-white focus:border-forge-gold/50 focus:ring-1 focus:ring-forge-gold/30 transition-all outline-none"
                       >
-                        <option value="porto-velho" className="bg-[#1a1a1a]">Porto Velho/RO</option>
-                        <option value="balneario" className="bg-[#1a1a1a]">Balneário Camboriú/SC</option>
-                        <option value="curitiba" className="bg-[#1a1a1a]">Curitiba/PR</option>
-                        <option value="belo-horizonte" className="bg-[#1a1a1a]">Belo Horizonte/MG</option>
-                        <option value="outra" className="bg-[#1a1a1a]">Outra cidade</option>
+                        <option value="Porto Velho/RO" className="bg-[#1a1a1a]">Porto Velho/RO</option>
+                        <option value="Balneário Camboriú/SC" className="bg-[#1a1a1a]">Balneário Camboriú/SC</option>
+                        <option value="Curitiba/PR" className="bg-[#1a1a1a]">Curitiba/PR</option>
+                        <option value="Belo Horizonte/MG" className="bg-[#1a1a1a]">Belo Horizonte/MG</option>
+                        <option value="Outra cidade" className="bg-[#1a1a1a]">Outra cidade</option>
                       </select>
                     </div>
 
                     <Button
                       type="submit"
-                      className="w-full py-6 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold text-base hover:brightness-110 transition-all forge-glow"
+                      disabled={createLead.isPending}
+                      className="w-full py-6 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold text-base hover:brightness-110 transition-all forge-glow disabled:opacity-50"
                     >
-                      <Flame className="w-5 h-5 mr-2" />
-                      Quero Ser um Legendário
+                      {createLead.isPending ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Flame className="w-5 h-5 mr-2" />
+                          Quero Ser um Legendário
+                        </>
+                      )}
                     </Button>
+
+                    {createLead.isError && (
+                      <div className="flex items-center gap-2 text-red-400 text-sm">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>{createLead.error?.message || "Erro ao enviar. Tente novamente."}</span>
+                      </div>
+                    )}
 
                     <p className="text-center text-xs text-white/30">
                       Ao enviar, você concorda com nossa Política de Privacidade (LGPD).
@@ -1042,7 +1353,7 @@ function Footer() {
 
         <div className="mt-8 pt-8 border-t border-white/[0.04] text-center">
           <p className="text-xs text-white/25">
-            Legendários Plataforma Full Service. Desenvolvido com Inteligência Artificial.
+            TOP Destemidos Pioneiros — Porto Velho/RO. Plataforma Full Service com Inteligência Artificial.
             Todos os direitos reservados.
           </p>
         </div>
@@ -1059,8 +1370,10 @@ export default function Home() {
       <HeroSection />
       <MovementSection />
       <EventsSection />
+      <TestimonialsSection />
       <PlatformSection />
       <ComparisonSection />
+      <CheckoutSection />
       <RoadmapSection />
       <QuoteSection />
       <InscriptionSection />

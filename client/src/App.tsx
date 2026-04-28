@@ -7,11 +7,13 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
+import Admin from "./pages/Admin";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
+      <Route path={"/admin"} component={Admin} />
       <Route path={"/pagamento/sucesso"} component={PaymentSuccess} />
       <Route path={"/pagamento/cancelado"} component={PaymentCancelled} />
       <Route path={"/404"} component={NotFound} />

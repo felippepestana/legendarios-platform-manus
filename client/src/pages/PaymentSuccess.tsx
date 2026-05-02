@@ -6,7 +6,7 @@ export default function PaymentSuccess() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "#0C0C0E" }}
+      style={{ background: "#0F0F0F" }}
     >
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -31,7 +31,7 @@ export default function PaymentSuccess() {
         </h1>
 
         <p className="text-white/60 text-lg mb-2">
-          Sua inscrição no <strong className="text-[#C8963E]">TOP Destemidos Pioneiros</strong> foi
+          Sua inscrição no <strong className="text-[#FF4500]">TOP Destemidos Pioneiros</strong> foi
           realizada com sucesso.
         </p>
 
@@ -43,7 +43,7 @@ export default function PaymentSuccess() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#C8963E] text-[#0C0C0E] font-bold hover:brightness-110 transition-all"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-[#FF4500] text-[#0F0F0F] font-bold hover:brightness-110 transition-all"
           >
             Voltar ao Início
             <ArrowRight className="w-4 h-4" />

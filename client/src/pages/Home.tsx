@@ -1,6 +1,6 @@
 /*
- * Design: "Forja Épica" — Dark Cinematic
- * Palette: Obsidian (#0C0C0E), Gold Forge (#C8963E), Ember Red (#B8372B), Steel (#8A8A8A)
+ * Design: "Legendários" — Dark Cinematic
+ * Palette: Preto (#0F0F0F), Laranjado (#FF4500), Ember (#E63900), Steel (#6B6B6B)
  * Typography: Playfair Display (titles) + DM Sans (body)
  */
 
@@ -116,16 +116,17 @@ function Navbar() {
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled
-          ? "bg-[#0C0C0E]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl"
+          ? "bg-[#0F0F0F]/95 backdrop-blur-xl border-b border-white/5 shadow-2xl"
           : "bg-transparent"
       }`}
     >
       <div className="container flex items-center justify-between h-16 md:h-20">
         <a href="#" className="flex items-center gap-2">
-          <Flame className="w-7 h-7 text-forge-gold" />
-          <span className="text-xl font-bold tracking-wide text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-            LEGENDÁRIOS
-          </span>
+          <img
+            src="/manus-storage/legendarios-logo-laranja_5596bd58.png"
+            alt="Legendários"
+            className="h-10 md:h-12 w-auto"
+          />
         </a>
 
         {/* Desktop */}
@@ -143,7 +144,7 @@ function Navbar() {
 
         <a
           href="#inscricao"
-          className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-forge-gold text-[#0C0C0E] font-semibold text-sm hover:brightness-110 transition-all forge-glow"
+          className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-forge-gold text-[#0F0F0F] font-semibold text-sm hover:brightness-110 transition-all forge-glow"
         >
           Quero Participar
           <ArrowRight className="w-4 h-4" />
@@ -162,7 +163,7 @@ function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden bg-[#0C0C0E]/98 backdrop-blur-xl border-b border-white/5 overflow-hidden"
+            className="md:hidden bg-[#0F0F0F]/98 backdrop-blur-xl border-b border-white/5 overflow-hidden"
           >
             <div className="container py-6 flex flex-col gap-4">
               {links.map((l) => (
@@ -178,7 +179,7 @@ function Navbar() {
               <a
                 href="#inscricao"
                 onClick={() => setMobileOpen(false)}
-                className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-forge-gold text-[#0C0C0E] font-semibold text-sm"
+                className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-forge-gold text-[#0F0F0F] font-semibold text-sm"
               >
                 Quero Participar
                 <ArrowRight className="w-4 h-4" />
@@ -203,7 +204,7 @@ function HeroSection() {
           className="w-full h-full object-cover"
         />
         <div className="cinematic-overlay absolute inset-0" />
-        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0C0C0E] to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[#0F0F0F] to-transparent" />
       </div>
 
       <div className="relative z-10 container text-center px-4 pt-20">
@@ -237,7 +238,7 @@ function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <a
               href="#inscricao"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold text-base hover:brightness-110 transition-all forge-glow"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-forge-gold text-[#0F0F0F] font-bold text-base hover:brightness-110 transition-all forge-glow"
             >
               <Flame className="w-5 h-5" />
               Inscreva-se no TOP Destemidos Pioneiros
@@ -442,12 +443,12 @@ function EventsSection() {
                     alt={ev.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E] via-[#0C0C0E]/40 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F] via-[#0F0F0F]/40 to-transparent" />
                   <div className="absolute top-4 left-4">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                         ev.highlight
-                          ? "bg-forge-gold text-[#0C0C0E]"
+                          ? "bg-forge-gold text-[#0F0F0F]"
                           : "bg-white/10 text-white/80 backdrop-blur-sm"
                       }`}
                     >
@@ -773,7 +774,7 @@ function PlatformSection() {
                 alt="Dashboard da plataforma"
                 className="w-full h-auto"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0C0C0E]/60 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F0F]/60 to-transparent" />
             </div>
           </FadeIn>
         </div>
@@ -964,7 +965,7 @@ function CheckoutSection() {
           <FadeIn delay={0.2}>
             <div className="relative p-8 rounded-2xl bg-gradient-to-br from-forge-gold/[0.06] to-transparent border border-forge-gold/20 hover:border-forge-gold/40 transition-all duration-500">
               <div className="absolute -top-3 left-8">
-                <span className="px-4 py-1 rounded-full bg-forge-gold text-[#0C0C0E] text-xs font-bold uppercase tracking-wider">
+                <span className="px-4 py-1 rounded-full bg-forge-gold text-[#0F0F0F] text-xs font-bold uppercase tracking-wider">
                   Mais Popular
                 </span>
               </div>
@@ -995,7 +996,7 @@ function CheckoutSection() {
               <button
                 onClick={() => handleCheckout("card")}
                 disabled={loadingMethod !== null}
-                className="block w-full text-center py-4 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold hover:brightness-110 transition-all forge-glow disabled:opacity-50 disabled:cursor-not-allowed"
+                className="block w-full text-center py-4 rounded-lg bg-forge-gold text-[#0F0F0F] font-bold hover:brightness-110 transition-all forge-glow disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loadingMethod === "card" ? (
                   <><Loader2 className="w-4 h-4 inline mr-2 animate-spin" />Processando...</>
@@ -1096,7 +1097,7 @@ function RoadmapSection() {
                   <div className={`${i % 2 === 1 ? "md:col-start-2" : ""}`}>
                     <div className="relative p-8 rounded-2xl bg-white/[0.02] border border-white/[0.06] hover:border-forge-gold/20 transition-all duration-500">
                       <div className="flex items-center gap-3 mb-4">
-                        <span className="px-3 py-1 rounded-full bg-forge-gold text-[#0C0C0E] text-xs font-bold uppercase tracking-wider">
+                        <span className="px-3 py-1 rounded-full bg-forge-gold text-[#0F0F0F] text-xs font-bold uppercase tracking-wider">
                           {p.phase}
                         </span>
                         <span className="text-white/40 text-sm">{p.period}</span>
@@ -1118,7 +1119,7 @@ function RoadmapSection() {
                         ))}
                       </ul>
 
-                      <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-forge-gold border-4 border-[#0C0C0E] z-10"
+                      <div className="hidden md:block absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-forge-gold border-4 border-[#0F0F0F] z-10"
                         style={{ [i % 2 === 0 ? "right" : "left"]: "-2.15rem" }}
                       />
                     </div>
@@ -1299,7 +1300,7 @@ function InscriptionSection() {
                     <Button
                       type="submit"
                       disabled={createLead.isPending}
-                      className="w-full py-6 rounded-lg bg-forge-gold text-[#0C0C0E] font-bold text-base hover:brightness-110 transition-all forge-glow disabled:opacity-50"
+                      className="w-full py-6 rounded-lg bg-forge-gold text-[#0F0F0F] font-bold text-base hover:brightness-110 transition-all forge-glow disabled:opacity-50"
                     >
                       {createLead.isPending ? (
                         <>
@@ -1342,10 +1343,11 @@ function Footer() {
       <div className="container">
         <div className="grid md:grid-cols-3 gap-8 items-center">
           <div className="flex items-center gap-2">
-            <Flame className="w-5 h-5 text-forge-gold" />
-            <span className="text-lg font-bold text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-              LEGENDÁRIOS
-            </span>
+            <img
+              src="/manus-storage/legendarios-logo-laranja_5596bd58.png"
+              alt="Legendários"
+              className="h-8 w-auto"
+            />
           </div>
 
           <div className="text-center">
@@ -1398,7 +1400,7 @@ function Footer() {
 // ─── Main Page ─────────────────────────────────────────────
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#0C0C0E]">
+    <div className="min-h-screen bg-[#0F0F0F]">
       <Navbar />
       <HeroSection />
       <MovementSection />

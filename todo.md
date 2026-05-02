@@ -35,3 +35,13 @@
 - [x] Remover fallback hardcoded de depoimentos e usar apenas estados loading/empty/error do banco
 - [x] Criar script de seed reproduzível versionado no projeto (scripts/seed-testimonials.mjs)
 - [x] Tornar testes de testimonials determinísticos com mocks/setup-teardown no leads.test.ts
+
+## Reestruturação Visual - Logo e Paleta de Cores
+- [x] Processar logo laranja com fundo transparente e fazer upload como asset
+- [x] Substituir logo atual no header por logomarca oficial Legendários (laranja)
+- [x] Ajustar paleta de cores: substituir dourado/gold por laranjado (#FF4500)
+- [x] Manter fundo preto/escuro e ajustar acentos para laranjado
+- [x] Atualizar CTAs (botões) para laranjado
+- [x] Ajustar textos de destaque para laranjado ao invés de gold
+- [x] Verificar contraste e legibilidade em todas as seções
+- [x] VITE_APP_LOGO não é consumida no código do projeto (confirmado via grep); logo aplicada diretamente no navbar e footer via img src

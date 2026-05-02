@@ -45,3 +45,17 @@
 - [x] Ajustar textos de destaque para laranjado ao invés de gold
 - [x] Verificar contraste e legibilidade em todas as seções
 - [x] VITE_APP_LOGO não é consumida no código do projeto (confirmado via grep); logo aplicada diretamente no navbar e footer via img src
+
+## Atualizações Baseadas na Pesquisa (loslegendarios.org + Instagram + Global)
+- [x] Atualizar evento principal de TOP 1670 para TOP 1870 (30/07 a 02/08/2026)
+- [x] Atualizar números: 189.000+ membros, 24 países, 110.000+ no Brasil
+- [x] Adicionar countdown timer para o TOP 1870
+- [x] Adicionar seção de ações humanitárias (MG, Águafrica, Touch Peace)
+- [x] Destacar valores AHU (Amor, Honra, Unidade) como pilares
+- [x] Usar frases reais do Instagram nos depoimentos e citações
+- [x] Adicionar referência ao Manifesto dos 24 Nós
+- [x] Atualizar citação inspiradora com frase real do movimento
+- [x] Abertura automática do WhatsApp após cadastro de lead
+- [x] Atualizar seed de depoimentos com 8 frases reais do Instagram
+- [x] Todos os 19 testes passando (4 arquivos de teste)
+- [x] Adicionar card do Manifesto dos 24 NÓS na QuoteSection com texto real do Instagram @legendariosglobal

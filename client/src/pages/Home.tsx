@@ -32,6 +32,10 @@ import {
   Quote,
   Loader2,
   AlertCircle,
+  Droplets,
+  HandHeart,
+  Timer,
+  Sparkles,
 } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { trpc } from "@/lib/trpc";
@@ -257,8 +261,8 @@ function HeroSection() {
         <FadeIn delay={0.6}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 max-w-3xl mx-auto">
             {[
-              { value: 197000, suffix: "+", label: "Legendários" },
-              { value: 26, suffix: "", label: "Países" },
+              { value: 189000, suffix: "+", label: "Legendários" },
+              { value: 24, suffix: "", label: "Países" },
               { value: 70, suffix: "+", label: "Cidades" },
               { value: 10, suffix: "+", label: "Anos" },
             ].map((s, i) => (
@@ -286,7 +290,47 @@ function HeroSection() {
   );
 }
 
-// ─── About / Movement Section ──────────────────────────────
+// ─── Countdown Timer ───────────────────────────────
+function CountdownTimer({ targetDate }: { targetDate: string }) {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const target = new Date(targetDate).getTime();
+    const update = () => {
+      const now = Date.now();
+      const diff = Math.max(0, target - now);
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      });
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  return (
+    <div className="grid grid-cols-4 gap-3">
+      {[
+        { value: timeLeft.days, label: "Dias" },
+        { value: timeLeft.hours, label: "Horas" },
+        { value: timeLeft.minutes, label: "Min" },
+        { value: timeLeft.seconds, label: "Seg" },
+      ].map((unit, i) => (
+        <div key={i} className="text-center p-3 rounded-xl bg-[#0F0F0F]/60 border border-forge-gold/20">
+          <div className="text-2xl md:text-3xl font-bold text-forge-gold" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {String(unit.value).padStart(2, "0")}
+          </div>
+          <div className="text-[10px] text-white/40 uppercase tracking-wider mt-1">{unit.label}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── About / Movement Section ──────────────────────────
 function MovementSection() {
   return (
     <section id="movimento" className="py-24 md:py-32 relative">
@@ -311,7 +355,10 @@ function MovementSection() {
                 Legendários é um movimento cristocêntrico que busca a transformação de homens,
                 famílias e comunidades por meio de experiências que levam os homens a encontrar
                 a melhor versão de si mesmos e seu novo potencial. Fundado na Guatemala por
-                Chepe Putzu, o movimento já impactou mais de 197 mil vidas em 26 países.
+                Chepe Putzu, o movimento já impactou mais de 189 mil vidas em 24 países.
+                Seus pilares são <strong className="text-forge-gold">Amor, Honra e Unidade (AHU)</strong>,
+                e cada Legendário assume os <strong className="text-white">24 Nós</strong> — compromissos
+                que guiam sua caminhada como homem de Deus.
               </p>
             </FadeIn>
 
@@ -319,14 +366,15 @@ function MovementSection() {
               <p className="text-white/70 text-base md:text-lg leading-relaxed mb-8">
                 No Brasil, o movimento chegou em 2017 através do Track Vale Europeu em
                 Balneário Camboriú/SC, e hoje é o país com o maior número de Legendários
-                no mundo, com mais de 10.000 homens transformados. O Track "Destemidos
-                Pioneiros" de Porto Velho/RO é uma das sedes mais ativas do país.
+                no mundo, com mais de <strong className="text-white">110.000 homens transformados</strong>.
+                O Track "Destemidos Pioneiros" de Porto Velho/RO é uma das sedes mais ativas
+                do país, com múltiplos TOPs realizados anualmente na natureza amazônica.
               </p>
             </FadeIn>
 
             <FadeIn delay={0.3}>
               <div className="flex flex-wrap gap-3">
-                {["Inquebrantáveis diante do pecado", "Quebrantados diante de Deus", "Heróis para suas famílias"].map(
+                {["Amor (A)", "Honra (H)", "Unidade (U)", "24 Nós", "Inquebrantáveis"].map(
                   (tag, i) => (
                     <span
                       key={i}
@@ -345,9 +393,9 @@ function MovementSection() {
               <div className="absolute -inset-4 bg-gradient-to-br from-forge-gold/10 to-transparent rounded-2xl blur-2xl" />
               <div className="relative grid grid-cols-2 gap-4">
                 {[
-                  { icon: Globe, label: "26 Países", desc: "Presença global" },
-                  { icon: Users, label: "197.000+", desc: "Legendários" },
-                  { icon: MapPin, label: "70+ Cidades", desc: "No mundo" },
+                  { icon: Globe, label: "24 Países", desc: "Presença global" },
+                  { icon: Users, label: "189.000+", desc: "Legendários" },
+                  { icon: MapPin, label: "110.000+", desc: "No Brasil" },
                   { icon: Flame, label: "10+ Anos", desc: "De transformação" },
                 ].map((item, i) => (
                   <div
@@ -365,6 +413,45 @@ function MovementSection() {
             </div>
           </FadeIn>
         </div>
+
+        {/* Ações Humanitárias */}
+        <FadeIn delay={0.4}>
+          <div className="mt-20">
+            <p className="text-forge-gold font-semibold tracking-[0.2em] uppercase text-xs mb-6 text-center">
+              Impacto Social
+            </p>
+            <div className="grid sm:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Droplets,
+                  title: "Águafrica",
+                  desc: "100 poços artesianos em Angola e Guiné-Bissau, levando água potável a comunidades inteiras.",
+                },
+                {
+                  icon: HandHeart,
+                  title: "Enchentes MG",
+                  desc: "800+ voluntários Legendários e 40+ toneladas de doações nas enchentes de Minas Gerais.",
+                },
+                {
+                  icon: Sparkles,
+                  title: "Touch Peace",
+                  desc: "App gratuito de saúde emocional em parceria com Augusto Cury, alcançando milhões.",
+                },
+              ].map((action, i) => (
+                <div
+                  key={i}
+                  className="p-6 rounded-xl bg-white/[0.02] border border-white/[0.06] hover:border-forge-gold/20 transition-all duration-500 group"
+                >
+                  <action.icon className="w-8 h-8 text-forge-gold mb-3 group-hover:scale-110 transition-transform" />
+                  <h4 className="text-lg font-bold text-white mb-2" style={{ fontFamily: "'Playfair Display', serif" }}>
+                    {action.title}
+                  </h4>
+                  <p className="text-sm text-white/50 leading-relaxed">{action.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
@@ -487,43 +574,55 @@ function EventsSection() {
           ))}
         </div>
 
-        {/* Porto Velho highlight */}
+        {/* Porto Velho highlight - TOP 1870 */}
         <FadeIn delay={0.3}>
           <div className="mt-16 p-8 md:p-12 rounded-2xl bg-gradient-to-br from-forge-gold/[0.06] to-transparent border border-forge-gold/15">
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div>
                 <p className="text-forge-gold font-semibold tracking-[0.15em] uppercase text-xs mb-3">
-                  Foco Principal
+                  Próximo Evento
                 </p>
                 <h3
                   className="text-2xl md:text-3xl font-bold text-white mb-4"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  TOP Destemidos Pioneiros — Porto Velho/RO
+                  TOP 1870 — Destemidos Pioneiros
                 </h3>
                 <p className="text-white/70 leading-relaxed mb-4">
-                  Porto Velho/RO é uma das sedes mais ativas do Brasil, com múltiplos eventos
-                  anuais. O Track "Destemidos Pioneiros" já transformou centenas de homens na
-                  região amazônica, provando que a coragem não conhece fronteiras geográficas.
+                  De <strong className="text-white">30 de julho a 02 de agosto de 2026</strong>,
+                  Porto Velho será palco do TOP 1870. São 72 horas de transformação, desafio
+                  e propósito na natureza amazônica. Inscrições abertas.
                 </p>
-                <div className="flex items-center gap-2 text-forge-gold text-sm font-medium">
-                  <MapPin className="w-4 h-4" />
-                  Porto Velho, Rondônia — Brasil
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-2 text-forge-gold text-sm font-medium">
+                    <Calendar className="w-4 h-4" />
+                    30/07 a 02/08/2026 (72 horas)
+                  </div>
+                  <div className="flex items-center gap-2 text-forge-gold text-sm font-medium">
+                    <MapPin className="w-4 h-4" />
+                    Porto Velho, Rondônia — Brasil
+                  </div>
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-4">
-                {[
-                  { label: "TOP 1570", date: "Fev/2026" },
-                  { label: "TOP 1670", date: "Abr/2026" },
-                  { label: "TOP 1870", date: "Jul/2026" },
-                ].map((ev, i) => (
-                  <div key={i} className="text-center p-4 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                    <div className="text-lg font-bold text-forge-gold" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {ev.label}
+              <div>
+                <CountdownTimer targetDate="2026-07-30T06:00:00-04:00" />
+                <div className="grid grid-cols-3 gap-3 mt-6">
+                  {[
+                    { label: "TOP 1570", date: "Fev/2026", status: "Realizado" },
+                    { label: "TOP 1670", date: "Abr/2026", status: "Realizado" },
+                    { label: "TOP 1870", date: "Jul/2026", status: "Inscrições Abertas" },
+                  ].map((ev, i) => (
+                    <div key={i} className={`text-center p-4 rounded-xl border ${ev.status === "Inscrições Abertas" ? "bg-forge-gold/10 border-forge-gold/30" : "bg-white/[0.03] border-white/[0.06]"}`}>
+                      <div className="text-lg font-bold text-forge-gold" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        {ev.label}
+                      </div>
+                      <div className="text-xs text-white/50 mt-1">{ev.date}</div>
+                      <div className={`text-[10px] mt-1 font-medium ${ev.status === "Inscrições Abertas" ? "text-forge-gold" : "text-white/30"}`}>
+                        {ev.status}
+                      </div>
                     </div>
-                    <div className="text-xs text-white/50 mt-1">{ev.date}</div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -1134,7 +1233,7 @@ function RoadmapSection() {
   );
 }
 
-// ─── Quote Section ─────────────────────────────────────────
+// ─── Quote Section ──────────────────────────────────
 function QuoteSection() {
   return (
     <section className="py-24 md:py-32 relative overflow-hidden">
@@ -1162,6 +1261,31 @@ function QuoteSection() {
             </div>
           </div>
         </FadeIn>
+
+        {/* Manifesto dos 24 Nós */}
+        <FadeIn delay={0.2}>
+          <div className="mt-20 max-w-3xl mx-auto">
+            <div className="p-8 md:p-10 rounded-2xl bg-white/[0.02] border border-white/[0.06] text-center">
+              <h3
+                className="text-xl md:text-2xl font-bold text-white mb-4"
+                style={{ fontFamily: "'Playfair Display', serif" }}
+              >
+                O Manifesto dos <span className="text-forge-gold">24 NÓS</span>
+              </h3>
+              <p className="text-white/60 text-sm md:text-base leading-relaxed mb-6">
+                Criado durante o NEST 2025 com líderes de todas as sedes do Brasil,
+                o Manifesto dos 24 NÓS representa quem somos, no que acreditamos e como
+                vivemos nossa missão. Cada NÓS está fundamentado na Palavra de Deus.
+                Cada princípio reflete nossa identidade como homens de verdade com valores
+                inabaláveis. Cada compromisso é uma ação que nos une como comunidade,
+                deixando um legado para nossa família, igreja e sociedade.
+              </p>
+              <p className="text-forge-gold font-bold text-lg italic">
+                "Este é nosso pacto. Este é nosso legado. AHU!"
+              </p>
+            </div>
+          </div>
+        </FadeIn>
       </div>
     </section>
   );
@@ -1176,6 +1300,14 @@ function InscriptionSection() {
     onSuccess: () => {
       setSubmitted(true);
       toast.success("Inscrição recebida com sucesso!");
+      // Abrir WhatsApp automaticamente após cadastro
+      const whatsappNumber = "5569999999999"; // Número do atendimento Legendários PVH
+      const message = encodeURIComponent(
+        `Olá! Sou ${formData.name} e acabei de me inscrever no TOP Destemidos Pioneiros pelo site. Gostaria de mais informações sobre o TOP 1870 (30/07 a 02/08). AHU!`
+      );
+      setTimeout(() => {
+        window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+      }, 1500);
     },
     onError: (error) => {
       toast.error(error.message || "Erro ao enviar inscrição. Tente novamente.");
@@ -1219,7 +1351,7 @@ function InscriptionSection() {
 
                 <div className="space-y-4">
                   {[
-                    { icon: Calendar, text: "Próximo TOP Destemidos Pioneiros: 30/07 a 02/08 de 2026" },
+                    { icon: Calendar, text: "TOP 1870 — Destemidos Pioneiros: 30/07 a 02/08 de 2026" },
                     { icon: MapPin, text: "Track Destemidos Pioneiros — Porto Velho/RO" },
                     { icon: CreditCard, text: "Parcelamento em até 10x no cartão" },
                   ].map((item, i) => (
@@ -1243,8 +1375,12 @@ function InscriptionSection() {
                     >
                       Inscrição Recebida!
                     </h3>
-                    <p className="text-white/60 text-sm">
+                    <p className="text-white/60 text-sm mb-4">
                       Entraremos em contato em breve pelo WhatsApp.
+                    </p>
+                    <p className="text-white/40 text-xs">
+                      Uma conversa no WhatsApp foi aberta automaticamente para você.
+                      Caso não tenha aberto, <a href="https://wa.me/5569999999999" target="_blank" rel="noopener" className="text-forge-gold underline">clique aqui</a>.
                     </p>
                   </div>
                 ) : (

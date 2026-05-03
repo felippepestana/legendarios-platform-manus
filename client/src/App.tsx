@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
+import AdminTestimonials from "./pages/AdminTestimonials";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/pagamento/sucesso"} component={PaymentSuccess} />
       <Route path={"/pagamento/cancelado"} component={PaymentCancelled} />
+      <Route path={"/admin/depoimentos"} component={AdminTestimonials} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

@@ -131,3 +131,17 @@ export async function createTestimonial(data: { name: string; city: string; even
   await db.insert(testimonials).values(data);
   return true;
 }
+
+export async function updateTestimonial(id: number, data: Partial<{ name: string; city: string; event: string; quote: string; avatarUrl: string | null; rating: number; featured: number }>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(testimonials).set(data).where(eq(testimonials.id, id));
+  return true;
+}
+
+export async function deleteTestimonial(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.delete(testimonials).where(eq(testimonials.id, id));
+  return true;
+}

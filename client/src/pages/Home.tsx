@@ -50,6 +50,17 @@ const IMAGES = {
   dashboard: "https://d2xsxph8kpxj0f.cloudfront.net/310419663028978368/S84CDFgDSnL8B2KjgsuVBm/platform-dashboard-3xuwt8HWhH4s2VZLsoC5Em.webp",
 };
 
+const GALLERY_IMAGES = [
+  { src: "/manus-storage/gallery_summit_4ef101c3.jpg", alt: "Grupo no topo da montanha ao nascer do sol", caption: "Conquista no topo" },
+  { src: "/manus-storage/gallery_triumph_2cb23728.jpg", alt: "Celebração de vitória no cume", caption: "Vitória coletiva" },
+  { src: "/manus-storage/gallery_mens_trip_e096e6a1.jpg", alt: "Grupo de homens em trilha na montanha", caption: "Trilha de guerreiros" },
+  { src: "/manus-storage/gallery_rio_madeira_528050ff.jpg", alt: "Pôr do sol no Rio Madeira em Porto Velho", caption: "Rio Madeira — Porto Velho" },
+  { src: "/manus-storage/gallery_cachoeira_8b030719.jpg", alt: "Cachoeira em Rondônia", caption: "Cachoeiras de Rondônia" },
+  { src: "/manus-storage/gallery_floresta_5a65f899.jpg", alt: "Trilha na floresta amazônica", caption: "Floresta Amazônica" },
+  { src: "/manus-storage/gallery_trilha_pvh_06638ee1.jpg", alt: "Trilha palafitada no Parque Natural de Porto Velho", caption: "Parque Natural PVH" },
+  { src: "/manus-storage/gallery_amazon_canoe_44cc9c28.jpg", alt: "Canoa no rio amazônico ao entardecer", caption: "Aventura nos rios" },
+];
+
 // ─── Animated counter ──────────────────────────────────────
 function Counter({ end, suffix = "", duration = 2000 }: { end: number; suffix?: string; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -1291,7 +1302,91 @@ function QuoteSection() {
   );
 }
 
-// ─── CTA / Inscription Section (connected to API) ─────────
+// ─── Gallery Section (Porto Velho & Rondônia) ──────────
+function GallerySection() {
+  const [selectedImage, setSelectedImage] = useState<number | null>(null);
+
+  return (
+    <section id="galeria" className="py-24 md:py-32 relative bg-[#0a0a0a]">
+      <div className="container">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <span className="text-forge-gold/80 text-sm font-medium tracking-[0.2em] uppercase mb-4 block">
+              Porto Velho & Rondônia
+            </span>
+            <h2 className="text-3xl md:text-5xl font-bold text-white font-display">
+              Onde a <span className="text-forge-gold">Aventura</span> Acontece
+            </h2>
+            <p className="text-white/50 mt-4 max-w-2xl mx-auto">
+              A natureza exuberante da Amazônia, o Rio Madeira e as trilhas de Rondônia —
+              cenário perfeito para os Destemidos Pioneiros viverem experiências transformadoras.
+            </p>
+          </div>
+        </FadeIn>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+          {GALLERY_IMAGES.map((img, i) => (
+            <FadeIn key={i} delay={i * 0.08}>
+              <div
+                className="relative group cursor-pointer overflow-hidden rounded-xl aspect-square"
+                onClick={() => setSelectedImage(i)}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <div className="absolute bottom-0 left-0 right-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                  <p className="text-white text-sm font-medium">{img.caption}</p>
+                </div>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+
+      {/* Lightbox */}
+      <AnimatePresence>
+        {selectedImage !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+            onClick={() => setSelectedImage(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="relative max-w-4xl max-h-[85vh] w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img
+                src={GALLERY_IMAGES[selectedImage].src}
+                alt={GALLERY_IMAGES[selectedImage].alt}
+                className="w-full h-full object-contain rounded-xl"
+              />
+              <div className="absolute bottom-4 left-4 right-4 text-center">
+                <p className="text-white font-medium text-lg">{GALLERY_IMAGES[selectedImage].caption}</p>
+              </div>
+              <button
+                onClick={() => setSelectedImage(null)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </section>
+  );
+}
+
+// ─── CTA / Inscription Section (connected to API) ─────
 function InscriptionSection() {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "", city: "Porto Velho/RO" });
   const [submitted, setSubmitted] = useState(false);
@@ -1301,7 +1396,7 @@ function InscriptionSection() {
       setSubmitted(true);
       toast.success("Inscrição recebida com sucesso!");
       // Abrir WhatsApp automaticamente após cadastro
-      const whatsappNumber = "5569999999999"; // Número do atendimento Legendários PVH
+      const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || "5569999999999";
       const message = encodeURIComponent(
         `Olá! Sou ${formData.name} e acabei de me inscrever no TOP Destemidos Pioneiros pelo site. Gostaria de mais informações sobre o TOP 1870 (30/07 a 02/08). AHU!`
       );
@@ -1380,7 +1475,7 @@ function InscriptionSection() {
                     </p>
                     <p className="text-white/40 text-xs">
                       Uma conversa no WhatsApp foi aberta automaticamente para você.
-                      Caso não tenha aberto, <a href="https://wa.me/5569999999999" target="_blank" rel="noopener" className="text-forge-gold underline">clique aqui</a>.
+                      Caso não tenha aberto, <a href={`https://wa.me/${import.meta.env.VITE_WHATSAPP_NUMBER || "5569999999999"}`} target="_blank" rel="noopener" className="text-forge-gold underline">clique aqui</a>.
                     </p>
                   </div>
                 ) : (
@@ -1547,6 +1642,7 @@ export default function Home() {
       <CheckoutSection />
       <RoadmapSection />
       <QuoteSection />
+      <GallerySection />
       <InscriptionSection />
       <Footer />
     </div>

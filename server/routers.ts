@@ -1,8 +1,8 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
-import { createLead, getLeads, getFeaturedTestimonials, getAllTestimonials, createTestimonial } from "./db";
+import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
+import { createLead, getLeads, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { createCheckoutSession } from "./stripe";
 import { PRODUCTS } from "./stripe-products";
@@ -89,7 +89,7 @@ export const appRouter = router({
       return getAllTestimonials();
     }),
 
-    create: protectedProcedure
+    create: adminProcedure
       .input(
         z.object({
           name: z.string().min(2),
@@ -103,6 +103,32 @@ export const appRouter = router({
       )
       .mutation(async ({ input }) => {
         await createTestimonial(input);
+        return { success: true };
+      }),
+
+    update: adminProcedure
+      .input(
+        z.object({
+          id: z.number(),
+          name: z.string().min(2).optional(),
+          city: z.string().min(2).optional(),
+          event: z.string().min(2).optional(),
+          quote: z.string().min(10).optional(),
+          avatarUrl: z.string().nullable().optional(),
+          rating: z.number().min(1).max(5).optional(),
+          featured: z.number().min(0).max(1).optional(),
+        })
+      )
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        await updateTestimonial(id, data);
+        return { success: true };
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteTestimonial(input.id);
         return { success: true };
       }),
   }),

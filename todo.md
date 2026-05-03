@@ -59,3 +59,12 @@
 - [x] Atualizar seed de depoimentos com 8 frases reais do Instagram
 - [x] Todos os 19 testes passando (4 arquivos de teste)
 - [x] Adicionar card do Manifesto dos 24 NÓS na QuoteSection com texto real do Instagram @legendariosglobal
+
+## Sugestões de Acompanhamento (Fase 2)
+- [x] Configurar número do WhatsApp como variável de ambiente (VITE_WHATSAPP_NUMBER)
+- [x] Criar rota /admin/depoimentos com painel CRUD de depoimentos (listar, aprovar, editar, remover)
+- [x] Proteger painel admin com role check (apenas admin)
+- [x] Criar galeria temática de Porto Velho/Rondônia com imagens da natureza amazônica (rio, trilhas, cachoeiras)
+- [x] Adicionar seção de galeria no Home.tsx entre depoimentos e inscrição
+- [x] Testes vitest para CRUD de depoimentos (create, update, delete)
+- [x] 28 testes passando (5 arquivos), 0 erros TypeScript

@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
-import { createLead, getLeads, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration } from "./db";
+import { createLead, getLeads, getLeadsFiltered, updateLeadStatus, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { createCheckoutSession } from "./stripe";
 import { PRODUCTS } from "./stripe-products";
@@ -48,9 +48,36 @@ export const appRouter = router({
         return { success: true, lead };
       }),
 
-    list: protectedProcedure.query(async () => {
-      return getLeads();
-    }),
+    list: adminProcedure
+      .input(z.object({
+        status: z.enum(["new", "contacted", "registered", "confirmed"]).optional(),
+        city: z.string().optional(),
+        search: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        return getLeadsFiltered(input);
+      }),
+    updateStatus: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        status: z.enum(["new", "contacted", "registered", "confirmed"]),
+      }))
+      .mutation(async ({ input }) => {
+        return updateLeadStatus(input.id, input.status);
+      }),
+    exportCsv: adminProcedure
+      .input(z.object({
+        status: z.enum(["new", "contacted", "registered", "confirmed"]).optional(),
+        city: z.string().optional(),
+      }).optional())
+      .query(async ({ input }) => {
+        const data = await getLeadsFiltered(input);
+        const header = "ID,Nome,Email,WhatsApp,Cidade,Evento,Status,Data Cadastro";
+        const rows = data.map((l: any) => 
+          `${l.id},"${l.name}","${l.email}","${l.whatsapp}","${l.city}","${l.event}","${l.status}","${l.createdAt}"`
+        );
+        return { csv: [header, ...rows].join("\n"), count: data.length };
+      }),
   }),
 
   checkout: router({

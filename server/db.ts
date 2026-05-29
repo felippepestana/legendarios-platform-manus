@@ -1,4 +1,4 @@
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and, like, SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { InsertUser, users, leads, InsertLead, Lead, testimonials } from "../drizzle/schema";
 import { ENV } from './_core/env';
@@ -112,6 +112,24 @@ export async function getLeads() {
   return db.select().from(leads).orderBy(desc(leads.createdAt));
 }
 
+export async function getLeadsFiltered(filters?: { status?: string; city?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+  const conditions: SQL[] = [];
+  if (filters?.status) conditions.push(eq(leads.status, filters.status as any));
+  if (filters?.city) conditions.push(eq(leads.city, filters.city));
+  if (filters?.search) conditions.push(like(leads.name, `%${filters.search}%`));
+  if (conditions.length === 0) return db.select().from(leads).orderBy(desc(leads.createdAt));
+  return db.select().from(leads).where(and(...conditions)).orderBy(desc(leads.createdAt));
+}
+
+export async function updateLeadStatus(id: number, status: string) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(leads).set({ status: status as any }).where(eq(leads.id, id));
+  return { success: true };
+}
+
 // ─── Testimonial helpers ───────────────────────────────────
 export async function getFeaturedTestimonials() {
   const db = await getDb();
@@ -148,7 +166,6 @@ export async function deleteTestimonial(id: number) {
 
 // ─── Registration helpers ─────────────────────────────────
 import { registrations, InsertRegistration, Registration, churches, InsertChurch, Church, spiritualLeaders, InsertSpiritualLeader, SpiritualLeader, emergencyContacts, InsertEmergencyContact, EmergencyContact, whatsappMessages, InsertWhatsappMessage, WhatsappMessage, messageTemplates } from "../drizzle/schema";
-import { like } from "drizzle-orm";
 
 export async function createRegistration(data: InsertRegistration): Promise<Registration | null> {
   const db = await getDb();

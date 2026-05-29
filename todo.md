@@ -95,3 +95,12 @@
 - [x] Links na landing page atualizados: botões 'Quero Participar', 'Inscreva-se' e hero apontam para /inscricao/participante
 - [x] Botões 'Quero Participar' e 'Quero Servir' adicionados na seção de inscrição
 - [x] Menu de navegação 'Inscreva-se' redireciona para /inscricao/participante
+
+## Melhorias de UX e Admin (Fase 4)
+- [x] Painel admin /admin/leads com listagem paginada, filtros por status e cidade
+- [x] Exportação CSV dos leads (download direto pelo admin)
+- [x] Máscaras de input: CPF (000.000.000-00), telefone ((69) 99999-9999), CEP (76800-000)
+- [x] Validação em tempo real nos campos obrigatórios com feedback visual (borda vermelha + mensagem)
+- [x] Transições animadas página a página nos formulários multi-step (slide/fade)
+- [x] Indicador de progresso visual atualizado dinamicamente
+- [x] Testes automatizados para exportação CSV, filtros, status e validações de máscaras (74 testes, 7 arquivos)

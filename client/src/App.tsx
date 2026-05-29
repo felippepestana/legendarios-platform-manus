@@ -12,6 +12,7 @@ import InscricaoParticipante from "./pages/InscricaoParticipante";
 import InscricaoServo from "./pages/InscricaoServo";
 import AdminInscricoes from "./pages/AdminInscricoes";
 import AdminWhatsApp from "./pages/AdminWhatsApp";
+import AdminLeads from "./pages/AdminLeads";
 
 function Router() {
   return (
@@ -24,6 +25,7 @@ function Router() {
       <Route path={"/inscricao/servo"} component={InscricaoServo} />
       <Route path={"/admin/inscricoes"} component={AdminInscricoes} />
       <Route path={"/admin/whatsapp"} component={AdminWhatsApp} />
+      <Route path={"/admin/leads"} component={AdminLeads} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

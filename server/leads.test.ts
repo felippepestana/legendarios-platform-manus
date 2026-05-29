@@ -54,6 +54,10 @@ vi.mock("./db", () => {
     ),
     getAllTestimonials: vi.fn().mockResolvedValue(testimonials),
     createTestimonial: vi.fn().mockResolvedValue(undefined),
+    getLeadsFiltered: vi.fn().mockResolvedValue([
+      { id: 1, name: "Test Lead", email: "test@test.com", whatsapp: "69999999999", city: "Porto Velho/RO", event: "TOP Destemidos Pioneiros", status: "new", createdAt: new Date(), updatedAt: new Date() },
+    ]),
+    updateLeadStatus: vi.fn().mockResolvedValue(undefined),
   };
 });
 
@@ -209,5 +213,77 @@ describe("leads.list (protected)", () => {
     const result = await caller.leads.list();
     expect(Array.isArray(result)).toBe(true);
     expect(result).toHaveLength(1);
+  });
+
+  it("accepts filter parameters", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.leads.list({ status: "new" });
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("accepts city filter", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.leads.list({ city: "Porto Velho/RO" });
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("accepts search filter", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.leads.list({ search: "Test" });
+    expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+describe("leads.exportCsv (protected)", () => {
+  it("requires authentication", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(caller.leads.exportCsv()).rejects.toThrow();
+  });
+
+  it("returns CSV string with headers", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.leads.exportCsv();
+    expect(result).toHaveProperty("csv");
+    expect(result).toHaveProperty("count");
+    expect(result.csv).toContain("ID,Nome,Email,WhatsApp,Cidade,Evento,Status,Data Cadastro");
+    expect(result.count).toBeGreaterThan(0);
+  });
+
+  it("respects filters in CSV export", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    const result = await caller.leads.exportCsv({ status: "new" });
+    expect(result).toHaveProperty("csv");
+    expect(result.csv).toContain("ID,Nome,Email,WhatsApp,Cidade,Evento,Status,Data Cadastro");
+  });
+});
+
+describe("leads.updateStatus (protected)", () => {
+  it("requires authentication", async () => {
+    const ctx = createPublicContext();
+    const caller = appRouter.createCaller(ctx);
+
+    await expect(caller.leads.updateStatus({ id: 1, status: "contacted" })).rejects.toThrow();
+  });
+
+  it("updates lead status when authenticated", async () => {
+    const ctx = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    // Should not throw - mutation completes successfully
+    await expect(
+      caller.leads.updateStatus({ id: 1, status: "contacted" })
+    ).resolves.not.toThrow();
   });
 });

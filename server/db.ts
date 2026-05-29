@@ -145,3 +145,155 @@ export async function deleteTestimonial(id: number) {
   await db.delete(testimonials).where(eq(testimonials.id, id));
   return true;
 }
+
+// ─── Registration helpers ─────────────────────────────────
+import { registrations, InsertRegistration, Registration, churches, InsertChurch, Church, spiritualLeaders, InsertSpiritualLeader, SpiritualLeader, emergencyContacts, InsertEmergencyContact, EmergencyContact, whatsappMessages, InsertWhatsappMessage, WhatsappMessage, messageTemplates } from "../drizzle/schema";
+import { like } from "drizzle-orm";
+
+export async function createRegistration(data: InsertRegistration): Promise<Registration | null> {
+  const db = await getDb();
+  if (!db) return null;
+  try {
+    await db.insert(registrations).values(data);
+    const [created] = await db.select().from(registrations).where(eq(registrations.cpf, data.cpf)).orderBy(desc(registrations.createdAt)).limit(1);
+    return created ?? null;
+  } catch (error) {
+    console.error("[Database] Failed to create registration:", error);
+    throw error;
+  }
+}
+
+export async function getRegistrations(type?: "participante" | "servo") {
+  const db = await getDb();
+  if (!db) return [];
+  if (type) {
+    return db.select().from(registrations).where(eq(registrations.type, type)).orderBy(desc(registrations.createdAt));
+  }
+  return db.select().from(registrations).orderBy(desc(registrations.createdAt));
+}
+
+export async function getRegistrationById(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const [reg] = await db.select().from(registrations).where(eq(registrations.id, id)).limit(1);
+  return reg ?? null;
+}
+
+export async function updateRegistrationStatus(id: number, status: "draft" | "submitted" | "approved" | "rejected", approvedBy?: number) {
+  const db = await getDb();
+  if (!db) return null;
+  const updateData: any = { status };
+  if (status === "approved") {
+    updateData.approvedAt = new Date();
+    if (approvedBy) updateData.approvedBy = approvedBy;
+  }
+  await db.update(registrations).set(updateData).where(eq(registrations.id, id));
+  return true;
+}
+
+// ─── Church helpers ───────────────────────────────────────
+export async function createChurch(data: InsertChurch): Promise<Church | null> {
+  const db = await getDb();
+  if (!db) return null;
+  await db.insert(churches).values(data);
+  const [created] = await db.select().from(churches).where(eq(churches.name, data.name)).orderBy(desc(churches.createdAt)).limit(1);
+  return created ?? null;
+}
+
+export async function listChurches(city?: string) {
+  const db = await getDb();
+  if (!db) return [];
+  if (city) {
+    return db.select().from(churches).where(like(churches.city, `%${city}%`)).orderBy(churches.name);
+  }
+  return db.select().from(churches).orderBy(churches.name);
+}
+
+export async function searchChurches(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(churches).where(like(churches.name, `%${query}%`)).orderBy(churches.name).limit(20);
+}
+
+// ─── Spiritual Leader helpers ─────────────────────────────
+export async function createSpiritualLeader(data: InsertSpiritualLeader): Promise<SpiritualLeader | null> {
+  const db = await getDb();
+  if (!db) return null;
+  await db.insert(spiritualLeaders).values(data);
+  const [created] = await db.select().from(spiritualLeaders).where(eq(spiritualLeaders.name, data.name)).orderBy(desc(spiritualLeaders.createdAt)).limit(1);
+  return created ?? null;
+}
+
+export async function listSpiritualLeaders(churchId?: number) {
+  const db = await getDb();
+  if (!db) return [];
+  if (churchId) {
+    return db.select().from(spiritualLeaders).where(eq(spiritualLeaders.churchId, churchId)).orderBy(spiritualLeaders.name);
+  }
+  return db.select().from(spiritualLeaders).orderBy(spiritualLeaders.name);
+}
+
+export async function searchSpiritualLeaders(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(spiritualLeaders).where(like(spiritualLeaders.name, `%${query}%`)).orderBy(spiritualLeaders.name).limit(20);
+}
+
+// ─── Emergency Contact helpers ────────────────────────────
+export async function createEmergencyContact(data: InsertEmergencyContact): Promise<EmergencyContact | null> {
+  const db = await getDb();
+  if (!db) return null;
+  await db.insert(emergencyContacts).values(data);
+  const [created] = await db.select().from(emergencyContacts).where(eq(emergencyContacts.registrationId, data.registrationId)).orderBy(desc(emergencyContacts.createdAt)).limit(1);
+  return created ?? null;
+}
+
+export async function getEmergencyContactsByRegistration(registrationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(emergencyContacts).where(eq(emergencyContacts.registrationId, registrationId));
+}
+
+// ─── WhatsApp Message helpers ─────────────────────────────
+export async function createWhatsappMessage(data: InsertWhatsappMessage): Promise<WhatsappMessage | null> {
+  const db = await getDb();
+  if (!db) return null;
+  await db.insert(whatsappMessages).values(data);
+  return null;
+}
+
+export async function getWhatsappMessagesByRegistration(registrationId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(whatsappMessages).where(eq(whatsappMessages.registrationId, registrationId)).orderBy(desc(whatsappMessages.createdAt));
+}
+
+export async function updateWhatsappMessageStatus(id: number, data: Partial<InsertWhatsappMessage>) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(whatsappMessages).set(data).where(eq(whatsappMessages.id, id));
+  return true;
+}
+
+export async function getWhatsappDashboardStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, sent: 0, delivered: 0, read: 0, responded: 0, authorized: 0, pending: 0, failed: 0 };
+  const all = await db.select().from(whatsappMessages);
+  return {
+    total: all.length,
+    sent: all.filter(m => m.status === "sent").length,
+    delivered: all.filter(m => m.status === "delivered").length,
+    read: all.filter(m => m.status === "read").length,
+    responded: all.filter(m => m.status === "responded").length,
+    authorized: all.filter(m => m.authorizationStatus === "authorized").length,
+    pending: all.filter(m => m.authorizationStatus === "pending").length,
+    failed: all.filter(m => m.status === "failed").length,
+  };
+}
+
+// ─── Message Template helpers ─────────────────────────────
+export async function getActiveTemplates() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(messageTemplates).where(eq(messageTemplates.isActive, 1)).orderBy(messageTemplates.name);
+}

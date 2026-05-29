@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerStripeWebhook } from "../stripe";
+import { whatsappWebhookRouter } from "../whatsapp-webhook";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -39,6 +40,8 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  // WhatsApp webhook for receiving message status and responses
+  app.use("/api/whatsapp", whatsappWebhookRouter);
   // tRPC API
   app.use(
     "/api/trpc",

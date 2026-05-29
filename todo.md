@@ -68,3 +68,25 @@
 - [x] Adicionar seção de galeria no Home.tsx entre depoimentos e inscrição
 - [x] Testes vitest para CRUD de depoimentos (create, update, delete)
 - [x] 28 testes passando (5 arquivos), 0 erros TypeScript
+
+## Documento de Cadastros + Formulário Multi-Step (Fase 3)
+- [x] Documento PDF com todos os cadastros existentes e novos da aplicação
+- [x] Schema: tabela churches (igrejas com nome, denominação, endereço, pastor)
+- [x] Schema: tabela spiritual_leaders (líderes espirituais com título, nome, igreja, contato)
+- [x] Schema: tabela registrations (inscrição completa: dados pessoais, médicos, emergência, eclesiásticos)
+- [x] Schema: tabela emergency_contacts (contatos de emergência com vínculo e dados completos)
+- [x] Schema: tabela whatsapp_messages (mensagens enviadas, status, respostas)
+- [x] Formulário multi-step Participante: dados pessoais → médicos → emergência → eclesiásticos → confirmação
+- [x] Formulário multi-step Servo: mesmos dados + líder espiritual obrigatório + função no evento
+- [x] Seleção/cadastro de igreja no formulário (busca + opção de novo cadastro)
+- [x] Seleção/cadastro de líder espiritual (busca + opção de novo cadastro)
+- [x] Sistema de envio de mensagem WhatsApp (Cloud API Meta / seguro)
+- [x] Dashboard de controle de respostas WhatsApp (enviadas, lidas, respondidas)
+- [x] Mensagem editável com variáveis dinâmicas ({nome}, {evento}, {data})
+- [x] Lógica de disparo: participante→mãe/responsável; servo→mãe+líder espiritual
+- [x] Testes automatizados para novos endpoints (49 testes, 6 arquivos)
+- [x] Admin /admin/inscricoes para gerenciar inscrições
+- [x] Admin /admin/whatsapp para dashboard de mensagens
+- [x] Webhook WhatsApp registrado no Express (/api/whatsapp/webhook)
+- [x] Disparo automático de mensagens após inscrição (participante→familiar, servo→familiar+líder)
+- [x] 49 testes passando (6 arquivos), 0 erros TypeScript

@@ -8,6 +8,10 @@ import Home from "./pages/Home";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentCancelled from "./pages/PaymentCancelled";
 import AdminTestimonials from "./pages/AdminTestimonials";
+import InscricaoParticipante from "./pages/InscricaoParticipante";
+import InscricaoServo from "./pages/InscricaoServo";
+import AdminInscricoes from "./pages/AdminInscricoes";
+import AdminWhatsApp from "./pages/AdminWhatsApp";
 
 function Router() {
   return (
@@ -16,6 +20,10 @@ function Router() {
       <Route path={"/pagamento/sucesso"} component={PaymentSuccess} />
       <Route path={"/pagamento/cancelado"} component={PaymentCancelled} />
       <Route path={"/admin/depoimentos"} component={AdminTestimonials} />
+      <Route path={"/inscricao/participante"} component={InscricaoParticipante} />
+      <Route path={"/inscricao/servo"} component={InscricaoServo} />
+      <Route path={"/admin/inscricoes"} component={AdminInscricoes} />
+      <Route path={"/admin/whatsapp"} component={AdminWhatsApp} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

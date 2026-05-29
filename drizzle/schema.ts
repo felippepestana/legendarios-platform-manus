@@ -2,16 +2,9 @@ import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-or
 
 /**
  * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
  */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -74,3 +67,179 @@ export const orders = mysqlTable("orders", {
 
 export type Order = typeof orders.$inferSelect;
 export type InsertOrder = typeof orders.$inferInsert;
+
+// ============================================================
+// SISTEMA DE INSCRIÇÃO COMPLETA (Formulário Multi-Step)
+// ============================================================
+
+// Churches - Igrejas e comunidades religiosas
+export const churches = mysqlTable("churches", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  denomination: varchar("denomination", { length: 100 }).notNull(),
+  pastorName: varchar("pastorName", { length: 255 }),
+  address: text("address"),
+  city: varchar("city", { length: 100 }).notNull(),
+  state: varchar("state", { length: 2 }),
+  phone: varchar("phone", { length: 20 }),
+  whatsapp: varchar("whatsapp", { length: 20 }),
+  createdBy: int("createdBy"),
+  isVerified: int("isVerified").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Church = typeof churches.$inferSelect;
+export type InsertChurch = typeof churches.$inferInsert;
+
+// Spiritual Leaders - Líderes espirituais (pastores, apóstolos, discipuladores)
+export const spiritualLeaders = mysqlTable("spiritual_leaders", {
+  id: int("id").autoincrement().primaryKey(),
+  title: mysqlEnum("title", ["Pastor", "Apostolo", "Bispo", "Presbitero", "Discipulador", "Lider", "Padre", "Outro"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  churchId: int("churchId"),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  createdBy: int("createdBy"),
+  isVerified: int("isVerified").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SpiritualLeader = typeof spiritualLeaders.$inferSelect;
+export type InsertSpiritualLeader = typeof spiritualLeaders.$inferInsert;
+
+// Registrations - Inscrição completa (participante ou servo)
+export const registrations = mysqlTable("registrations", {
+  id: int("id").autoincrement().primaryKey(),
+  type: mysqlEnum("regType", ["participante", "servo"]).notNull(),
+  event: varchar("event", { length: 100 }).default("TOP 1870").notNull(),
+  status: mysqlEnum("regStatus", ["draft", "submitted", "approved", "rejected"]).default("draft").notNull(),
+
+  // Dados Pessoais
+  fullName: varchar("fullName", { length: 255 }).notNull(),
+  cpf: varchar("cpf", { length: 14 }).notNull(),
+  rg: varchar("rg", { length: 20 }),
+  birthDate: varchar("birthDate", { length: 10 }).notNull(),
+  maritalStatus: mysqlEnum("maritalStatus", ["solteiro", "casado", "divorciado", "viuvo", "uniao_estavel"]).notNull(),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  address: text("address").notNull(),
+  neighborhood: varchar("neighborhood", { length: 100 }).notNull(),
+  city: varchar("city", { length: 100 }).notNull(),
+  state: varchar("state", { length: 2 }).notNull(),
+  zipCode: varchar("zipCode", { length: 9 }).notNull(),
+  profession: varchar("profession", { length: 100 }),
+  shirtSize: mysqlEnum("shirtSize", ["PP", "P", "M", "G", "GG", "XG", "XXG"]).notNull(),
+
+  // Dados Médicos
+  bloodType: mysqlEnum("bloodType", ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "nao_sei"]).notNull(),
+  hasAllergy: int("hasAllergy").default(0).notNull(),
+  allergyDetails: text("allergyDetails"),
+  hasMedication: int("hasMedication").default(0).notNull(),
+  medicationDetails: text("medicationDetails"),
+  hasChronicDisease: int("hasChronicDisease").default(0).notNull(),
+  chronicDiseaseDetails: text("chronicDiseaseDetails"),
+  hasPhysicalRestriction: int("hasPhysicalRestriction").default(0).notNull(),
+  physicalRestrictionDetails: text("physicalRestrictionDetails"),
+  hasFoodRestriction: int("hasFoodRestriction").default(0).notNull(),
+  foodRestrictionDetails: text("foodRestrictionDetails"),
+  healthInsurance: varchar("healthInsurance", { length: 100 }),
+  healthObservations: text("healthObservations"),
+
+  // Dados Eclesiásticos
+  churchId: int("churchId"),
+  churchName: varchar("churchName", { length: 255 }),
+  denomination: varchar("denomination", { length: 100 }),
+  spiritualLeaderId: int("spiritualLeaderId"),
+  memberSince: varchar("memberSince", { length: 10 }),
+  ministryRole: varchar("ministryRole", { length: 100 }),
+  baptized: int("baptized").default(0).notNull(),
+  baptizedHolySpirit: int("baptizedHolySpirit").default(0).notNull(),
+
+  // Dados Específicos de Servo
+  servantRole: varchar("servantRole", { length: 100 }),
+  previousTops: int("previousTops").default(0),
+  legendaryNumber: varchar("legendaryNumber", { length: 20 }),
+
+  // Metadados
+  userId: int("userId"),
+  leadId: int("leadId"),
+  orderId: int("orderId"),
+  submittedAt: timestamp("submittedAt"),
+  approvedAt: timestamp("approvedAt"),
+  approvedBy: int("approvedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Registration = typeof registrations.$inferSelect;
+export type InsertRegistration = typeof registrations.$inferInsert;
+
+// Emergency Contacts - Contatos de emergência vinculados a uma inscrição
+export const emergencyContacts = mysqlTable("emergency_contacts", {
+  id: int("id").autoincrement().primaryKey(),
+  registrationId: int("registrationId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  relationship: mysqlEnum("relationship", ["esposa", "mae", "pai", "irmao", "irma", "filho", "filha", "tio", "tia", "avo", "outro"]).notNull(),
+  relationshipOther: varchar("relationshipOther", { length: 100 }),
+  phone: varchar("phone", { length: 20 }).notNull(),
+  whatsapp: varchar("whatsapp", { length: 20 }).notNull(),
+  email: varchar("email", { length: 320 }),
+  isAuthorizationContact: int("isAuthorizationContact").default(0).notNull(),
+  isPrimaryContact: int("isPrimaryContact").default(0).notNull(),
+  city: varchar("city", { length: 100 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type EmergencyContact = typeof emergencyContacts.$inferSelect;
+export type InsertEmergencyContact = typeof emergencyContacts.$inferInsert;
+
+// WhatsApp Messages - Mensagens de autorização enviadas e respostas recebidas
+export const whatsappMessages = mysqlTable("whatsapp_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  registrationId: int("registrationId").notNull(),
+  contactId: int("contactId").notNull(),
+  recipientType: mysqlEnum("recipientType", ["familiar", "lider_espiritual"]).notNull(),
+  recipientName: varchar("recipientName", { length: 255 }).notNull(),
+  recipientWhatsapp: varchar("recipientWhatsapp", { length: 20 }).notNull(),
+  templateId: int("templateId"),
+  messageContent: text("messageContent").notNull(),
+  status: mysqlEnum("msgStatus", ["queued", "sent", "delivered", "read", "responded", "failed", "expired"]).default("queued").notNull(),
+  sentAt: timestamp("sentAt"),
+  deliveredAt: timestamp("deliveredAt"),
+  readAt: timestamp("readAt"),
+  respondedAt: timestamp("respondedAt"),
+  responseType: mysqlEnum("responseType", ["text", "audio", "image", "video", "document"]),
+  responseContent: text("responseContent"),
+  responseStorageKey: varchar("responseStorageKey", { length: 255 }),
+  authorizationStatus: mysqlEnum("authorizationStatus", ["pending", "authorized", "denied", "unclear"]).default("pending"),
+  authorizationNotes: text("authorizationNotes"),
+  processedBy: int("processedBy"),
+  processedAt: timestamp("processedAt"),
+  retryCount: int("retryCount").default(0),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WhatsappMessage = typeof whatsappMessages.$inferSelect;
+export type InsertWhatsappMessage = typeof whatsappMessages.$inferInsert;
+
+// Message Templates - Templates editáveis para mensagens de autorização
+export const messageTemplates = mysqlTable("message_templates", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 100 }).notNull(),
+  type: mysqlEnum("templateType", ["autorizacao_familiar", "autorizacao_lider", "confirmacao", "lembrete"]).notNull(),
+  targetAudience: mysqlEnum("targetAudience", ["esposa", "mae_responsavel", "lider_espiritual", "todos"]).notNull(),
+  content: text("content").notNull(),
+  isActive: int("isActive").default(1).notNull(),
+  createdBy: int("createdBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type MessageTemplate = typeof messageTemplates.$inferSelect;
+export type InsertMessageTemplate = typeof messageTemplates.$inferInsert;

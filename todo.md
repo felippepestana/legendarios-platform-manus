@@ -90,3 +90,8 @@
 - [x] Webhook WhatsApp registrado no Express (/api/whatsapp/webhook)
 - [x] Disparo automático de mensagens após inscrição (participante→familiar, servo→familiar+líder)
 - [x] 49 testes passando (6 arquivos), 0 erros TypeScript
+
+## Correção de Links de Inscrição (Fase 3.1)
+- [x] Links na landing page atualizados: botões 'Quero Participar', 'Inscreva-se' e hero apontam para /inscricao/participante
+- [x] Botões 'Quero Participar' e 'Quero Servir' adicionados na seção de inscrição
+- [x] Menu de navegação 'Inscreva-se' redireciona para /inscricao/participante

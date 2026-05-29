@@ -124,7 +124,7 @@ function Navbar() {
     { label: "Eventos", href: "#eventos" },
     { label: "Depoimentos", href: "#depoimentos" },
     { label: "Plataforma", href: "#plataforma" },
-    { label: "Inscreva-se", href: "#inscricao" },
+    { label: "Inscreva-se", href: "/inscricao/participante" },
   ];
 
   return (
@@ -158,7 +158,7 @@ function Navbar() {
         </div>
 
         <a
-          href="#inscricao"
+          href="/inscricao/participante"
           className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-forge-gold text-[#0F0F0F] font-semibold text-sm hover:brightness-110 transition-all forge-glow"
         >
           Quero Participar
@@ -192,7 +192,7 @@ function Navbar() {
                 </a>
               ))}
               <a
-                href="#inscricao"
+                href="/inscricao/participante"
                 onClick={() => setMobileOpen(false)}
                 className="mt-2 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-forge-gold text-[#0F0F0F] font-semibold text-sm"
               >
@@ -252,7 +252,7 @@ function HeroSection() {
         <FadeIn delay={0.45}>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <a
-              href="#inscricao"
+              href="/inscricao/participante"
               className="inline-flex items-center gap-2 px-8 py-4 rounded-lg bg-forge-gold text-[#0F0F0F] font-bold text-base hover:brightness-110 transition-all forge-glow"
             >
               <Flame className="w-5 h-5" />
@@ -1440,9 +1440,26 @@ function InscriptionSection() {
                   <span className="text-forge-gradient">TOP Destemidos Pioneiros</span>
                 </h2>
                 <p className="text-white/70 leading-relaxed mb-6">
-                  Preencha o formulário e nossa equipe entrará em contato para
-                  guiá-lo no processo de inscrição. Vagas limitadas por edição.
+                  Escolha seu tipo de inscrição e preencha o formulário completo.
+                  Vagas limitadas por edição.
                 </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 mb-8">
+                  <a
+                    href="/inscricao/participante"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-forge-gold text-[#0F0F0F] font-bold text-sm hover:brightness-110 transition-all forge-glow"
+                  >
+                    <Flame className="w-4 h-4" />
+                    Quero Participar
+                  </a>
+                  <a
+                    href="/inscricao/servo"
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-forge-gold/50 text-forge-gold font-bold text-sm hover:bg-forge-gold/10 transition-all"
+                  >
+                    <Shield className="w-4 h-4" />
+                    Quero Servir
+                  </a>
+                </div>
 
                 <div className="space-y-4">
                   {[

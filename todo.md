@@ -104,3 +104,16 @@
 - [x] Transições animadas página a página nos formulários multi-step (slide/fade)
 - [x] Indicador de progresso visual atualizado dinamicamente
 - [x] Testes automatizados para exportação CSV, filtros, status e validações de máscaras (74 testes, 7 arquivos)
+
+## Integrações e Dashboard (Fase 5)
+- [x] Criar tabela app_settings no banco para armazenar configurações dinâmicas
+- [x] Painel admin /admin/configuracoes com campos editáveis para WhatsApp (Phone Number ID, Access Token, Verify Token)
+- [x] Painel configurável para outras settings (nome do evento, datas, mensagens padrão)
+- [x] Backend lê credenciais WhatsApp do banco ao invés de env vars fixas
+- [x] Integrar API ViaCEP para preenchimento automático de endereço ao digitar CEP
+- [x] Hook useCepLookup com loading state e tratamento de erros
+- [x] Aplicar busca de CEP nos formulários de Participante e Servo
+- [x] Dashboard /admin/metricas com gráficos de conversão (leads → inscritos → confirmados)
+- [x] Distribuição por cidade e evolução temporal dos cadastros
+- [x] Cards de KPIs (total leads, total inscritos, taxa de conversão, mensagens enviadas)
+- [x] 74 testes passando (7 arquivos), 0 erros TypeScript

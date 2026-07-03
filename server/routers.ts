@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
-import { createLead, getLeads, getLeadsFiltered, updateLeadStatus, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration } from "./db";
+import { createLead, getLeads, getLeadsFiltered, updateLeadStatus, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration, getAllSettings, getSettingsByCategory, upsertSetting, updateSettingValue, deleteSetting } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { createCheckoutSession } from "./stripe";
 import { PRODUCTS } from "./stripe-products";
@@ -445,10 +445,69 @@ export const appRouter = router({
         return searchSpiritualLeaders(input.query);
       }),
 
-    whatsappDashboard: adminProcedure.query(async () => {
+        whatsappDashboard: adminProcedure.query(async () => {
       return getWhatsappDashboardStats();
     }),
   }),
-});
 
+  settings: router({
+    getAll: adminProcedure.query(async () => {
+      return getAllSettings();
+    }),
+    getByCategory: adminProcedure
+      .input(z.object({ category: z.string() }))
+      .query(async ({ input }) => {
+        return getSettingsByCategory(input.category);
+      }),
+    upsert: adminProcedure
+      .input(z.object({
+        category: z.string(),
+        key: z.string(),
+        value: z.string().nullable(),
+        label: z.string(),
+        description: z.string().optional(),
+        fieldType: z.enum(["text", "password", "textarea", "number", "boolean", "select", "date"]).optional(),
+        isEncrypted: z.number().optional(),
+        isRequired: z.number().optional(),
+        sortOrder: z.number().optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        return upsertSetting({ ...input, updatedBy: ctx.user.id });
+      }),
+    updateValue: adminProcedure
+      .input(z.object({ id: z.number(), value: z.string().nullable() }))
+      .mutation(async ({ input, ctx }) => {
+        return updateSettingValue(input.id, input.value, ctx.user.id);
+      }),
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return deleteSetting(input.id);
+      }),
+    seed: adminProcedure.mutation(async ({ ctx }) => {
+      const defaults = [
+        { category: "whatsapp", key: "phone_number_id", label: "Phone Number ID", description: "ID do numero de telefone no WhatsApp Business API (Meta Business Manager > WhatsApp > API Setup)", fieldType: "text", isRequired: 1, sortOrder: 1 },
+        { category: "whatsapp", key: "access_token", label: "Access Token", description: "Token de acesso permanente do WhatsApp Business API", fieldType: "password", isEncrypted: 1, isRequired: 1, sortOrder: 2 },
+        { category: "whatsapp", key: "verify_token", label: "Verify Token", description: "Token de verificacao do webhook (qualquer string segura)", fieldType: "password", isEncrypted: 1, isRequired: 1, sortOrder: 3 },
+        { category: "whatsapp", key: "business_account_id", label: "Business Account ID", description: "ID da conta business no Meta (opcional)", fieldType: "text", isRequired: 0, sortOrder: 4 },
+        { category: "evento", key: "nome_evento", label: "Nome do Evento", description: "Nome do proximo TOP", fieldType: "text", isRequired: 1, sortOrder: 1 },
+        { category: "evento", key: "data_inicio", label: "Data de Inicio", description: "Data de inicio do evento (YYYY-MM-DD)", fieldType: "date", isRequired: 1, sortOrder: 2 },
+        { category: "evento", key: "data_fim", label: "Data de Termino", description: "Data de termino do evento (YYYY-MM-DD)", fieldType: "date", isRequired: 1, sortOrder: 3 },
+        { category: "evento", key: "local", label: "Local do Evento", description: "Cidade/Estado onde ocorrera o evento", fieldType: "text", isRequired: 1, sortOrder: 4 },
+        { category: "evento", key: "vagas_participantes", label: "Vagas Participantes", description: "Numero maximo de participantes", fieldType: "number", isRequired: 0, sortOrder: 5 },
+        { category: "evento", key: "vagas_servos", label: "Vagas Servos", description: "Numero maximo de servos", fieldType: "number", isRequired: 0, sortOrder: 6 },
+        { category: "mensagens", key: "msg_autorizacao_familiar", label: "Mensagem Autorizacao Familiar", description: "Template da mensagem enviada ao familiar. Variaveis: {nome}, {evento}, {data_inicio}, {data_fim}, {local}", fieldType: "textarea", isRequired: 1, sortOrder: 1 },
+        { category: "mensagens", key: "msg_autorizacao_lider", label: "Mensagem Autorizacao Lider", description: "Template da mensagem enviada ao lider espiritual. Variaveis: {nome}, {evento}, {data_inicio}, {data_fim}, {local}, {igreja}", fieldType: "textarea", isRequired: 1, sortOrder: 2 },
+        { category: "mensagens", key: "msg_confirmacao_inscricao", label: "Mensagem Confirmacao", description: "Mensagem enviada ao inscrito apos confirmacao. Variaveis: {nome}, {evento}, {data_inicio}", fieldType: "textarea", isRequired: 0, sortOrder: 3 },
+        { category: "geral", key: "whatsapp_atendimento", label: "WhatsApp Atendimento", description: "Numero do WhatsApp para atendimento (com codigo do pais)", fieldType: "text", isRequired: 1, sortOrder: 1 },
+        { category: "geral", key: "email_contato", label: "Email de Contato", description: "Email para contato geral", fieldType: "text", isRequired: 0, sortOrder: 2 },
+        { category: "geral", key: "instagram_url", label: "Instagram", description: "URL do perfil no Instagram", fieldType: "text", isRequired: 0, sortOrder: 3 },
+      ];
+      for (const setting of defaults) {
+        await upsertSetting({ ...setting, value: null, updatedBy: ctx.user.id } as any);
+      }
+      return { success: true, count: defaults.length };
+    }),
+  }),
+});
 export type AppRouter = typeof appRouter;

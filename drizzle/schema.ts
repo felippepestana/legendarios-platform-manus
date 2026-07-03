@@ -243,3 +243,22 @@ export const messageTemplates = mysqlTable("message_templates", {
 
 export type MessageTemplate = typeof messageTemplates.$inferSelect;
 export type InsertMessageTemplate = typeof messageTemplates.$inferInsert;
+
+// App Settings - Configurações dinâmicas da aplicação (WhatsApp, evento, mensagens, geral)
+export const appSettings = mysqlTable("app_settings", {
+  id: int("id").autoincrement().primaryKey(),
+  category: varchar("category", { length: 50 }).notNull(),
+  key: varchar("key", { length: 100 }).notNull(),
+  value: text("value"),
+  label: varchar("label", { length: 200 }).notNull(),
+  description: text("description"),
+  fieldType: mysqlEnum("fieldType", ["text", "password", "textarea", "number", "boolean", "select", "date"]).default("text").notNull(),
+  isEncrypted: int("isEncrypted").default(0).notNull(),
+  isRequired: int("isRequired").default(0).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  updatedBy: int("updatedBy"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type AppSetting = typeof appSettings.$inferSelect;
+export type InsertAppSetting = typeof appSettings.$inferInsert;

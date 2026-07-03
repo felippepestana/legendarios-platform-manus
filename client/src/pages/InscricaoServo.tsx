@@ -13,6 +13,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, User, Heart, Phone, Church, Shield
 import { Link } from "wouter";
 import { maskCPF, maskPhone, maskCEP, isValidCPF, isValidPhone, isValidCEP, isValidEmail, unmask } from "@/lib/masks";
 import { cn } from "@/lib/utils";
+import { useCepLookup } from "@/hooks/useCepLookup";
 
 const STEPS = [
   { id: 1, title: "Dados Pessoais", description: "Informações básicas" },
@@ -171,6 +172,7 @@ export default function InscricaoServo() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [slideDirection, setSlideDirection] = useState<"left" | "right">("right");
   const [isAnimating, setIsAnimating] = useState(false);
+  const cepLookup = useCepLookup();
 
   const [personal, setPersonal] = useState<PersonalData>({
     fullName: "", cpf: "", rg: "", birthDate: "", maritalStatus: "",
@@ -406,7 +408,21 @@ export default function InscricaoServo() {
                   <ValidatedInput label="Bairro" required value={personal.neighborhood} onChange={(v) => setPersonal({ ...personal, neighborhood: v })} placeholder="Bairro" />
                   <ValidatedInput label="Cidade" required value={personal.city} onChange={(v) => setPersonal({ ...personal, city: v })} placeholder="Porto Velho" />
                   <ValidatedInput label="UF" required value={personal.state} onChange={(v) => setPersonal({ ...personal, state: v.toUpperCase() })} placeholder="RO" maxLength={2} validate={(v) => v.length === 2} errorMessage="UF deve ter 2 letras" />
-                  <ValidatedInput label="CEP" required value={personal.zipCode} onChange={(v) => setPersonal({ ...personal, zipCode: v })} mask={maskCEP} validate={isValidCEP} placeholder="76800-000" errorMessage="CEP inválido (8 dígitos)" />
+                  <div className="relative">
+                    <ValidatedInput label="CEP" required value={personal.zipCode} onChange={async (v) => {
+                      setPersonal({ ...personal, zipCode: v });
+                      const digits = v.replace(/\D/g, "");
+                      if (digits.length === 8) {
+                        const result = await cepLookup.lookup(v);
+                        if (result) {
+                          setPersonal(prev => ({ ...prev, zipCode: v, address: result.logradouro || prev.address, neighborhood: result.bairro || prev.neighborhood, city: result.localidade || prev.city, state: result.uf || prev.state }));
+                          toast.success("Endereço preenchido automaticamente!");
+                        }
+                      }
+                    }} mask={maskCEP} validate={isValidCEP} placeholder="76800-000" errorMessage="CEP inválido (8 dígitos)" />
+                    {cepLookup.loading && <div className="absolute right-3 top-8"><Loader2 className="w-4 h-4 animate-spin text-primary" /></div>}
+                    {cepLookup.error && <p className="text-xs text-amber-400 mt-1">{cepLookup.error}</p>}
+                  </div>
                   <ValidatedInput label="Profissão" value={personal.profession} onChange={(v) => setPersonal({ ...personal, profession: v })} placeholder="Sua profissão" />
                   <div>
                     <Label className="text-sm text-zinc-300">Tamanho da Camiseta<span className="text-red-400 ml-0.5">*</span></Label>

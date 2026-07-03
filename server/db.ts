@@ -1,6 +1,6 @@
 import { eq, desc, and, like, SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, leads, InsertLead, Lead, testimonials } from "../drizzle/schema";
+import { InsertUser, users, leads, InsertLead, Lead, testimonials, appSettings, AppSetting, InsertAppSetting } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -313,4 +313,81 @@ export async function getActiveTemplates() {
   const db = await getDb();
   if (!db) return [];
   return db.select().from(messageTemplates).where(eq(messageTemplates.isActive, 1)).orderBy(messageTemplates.name);
+}
+
+// ============================================================
+// APP SETTINGS HELPERS
+// ============================================================
+
+export async function getSettingsByCategory(category: string) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(appSettings).where(eq(appSettings.category, category)).orderBy(appSettings.sortOrder);
+}
+
+export async function getAllSettings() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(appSettings).orderBy(appSettings.category, appSettings.sortOrder);
+}
+
+export async function getSettingValue(category: string, key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const results = await db.select().from(appSettings)
+    .where(and(eq(appSettings.category, category), eq(appSettings.key, key)))
+    .limit(1);
+  return results[0]?.value ?? null;
+}
+
+export async function upsertSetting(data: { category: string; key: string; value: string | null; label: string; description?: string | null; fieldType?: string; isEncrypted?: number; isRequired?: number; sortOrder?: number; updatedBy?: number }) {
+  const db = await getDb();
+  if (!db) return null;
+  const existing = await db.select().from(appSettings)
+    .where(and(eq(appSettings.category, data.category), eq(appSettings.key, data.key)))
+    .limit(1);
+  if (existing.length > 0) {
+    await db.update(appSettings)
+      .set({ value: data.value, updatedBy: data.updatedBy })
+      .where(eq(appSettings.id, existing[0].id));
+    return { ...existing[0], value: data.value };
+  } else {
+    const result = await db.insert(appSettings).values({
+      category: data.category,
+      key: data.key,
+      value: data.value,
+      label: data.label,
+      description: data.description ?? null,
+      fieldType: (data.fieldType as any) ?? "text",
+      isEncrypted: data.isEncrypted ?? 0,
+      isRequired: data.isRequired ?? 0,
+      sortOrder: data.sortOrder ?? 0,
+      updatedBy: data.updatedBy,
+    });
+    return { id: result[0].insertId, ...data };
+  }
+}
+
+export async function updateSettingValue(id: number, value: string | null, updatedBy?: number) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.update(appSettings)
+    .set({ value, updatedBy })
+    .where(eq(appSettings.id, id));
+  return { success: true };
+}
+
+export async function deleteSetting(id: number) {
+  const db = await getDb();
+  if (!db) return null;
+  await db.delete(appSettings).where(eq(appSettings.id, id));
+  return { success: true };
+}
+
+export async function getWhatsAppConfig() {
+  const phoneNumberId = await getSettingValue("whatsapp", "phone_number_id");
+  const accessToken = await getSettingValue("whatsapp", "access_token");
+  const verifyToken = await getSettingValue("whatsapp", "verify_token");
+  const businessAccountId = await getSettingValue("whatsapp", "business_account_id");
+  return { phoneNumberId, accessToken, verifyToken, businessAccountId };
 }

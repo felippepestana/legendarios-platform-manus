@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, adminProcedure, router } from "./_core/trpc";
-import { createLead, getLeads, getLeadsFiltered, updateLeadStatus, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration, getAllSettings, getSettingsByCategory, upsertSetting, updateSettingValue, deleteSetting } from "./db";
+import { createLead, getLeads, getLeadsFiltered, updateLeadStatus, getFeaturedTestimonials, getAllTestimonials, createTestimonial, updateTestimonial, deleteTestimonial, createRegistration, getRegistrations, getRegistrationById, updateRegistrationStatus, createChurch, listChurches, searchChurches, createSpiritualLeader, listSpiritualLeaders, searchSpiritualLeaders, createEmergencyContact, getEmergencyContactsByRegistration, getWhatsappDashboardStats, getWhatsappMessagesByRegistration, getAllSettings, getSettingsByCategory, upsertSetting, updateSettingValue, deleteSetting, createCheckin, getCheckinByToken, getCheckinByRegistrationId, performCheckin, manualCheckin, cancelCheckin, getAllCheckins, getCheckinStats } from "./db";
 import { notifyOwner } from "./_core/notification";
 import { createCheckoutSession } from "./stripe";
 import { PRODUCTS } from "./stripe-products";
@@ -507,6 +507,111 @@ export const appRouter = router({
         await upsertSetting({ ...setting, value: null, updatedBy: ctx.user.id } as any);
       }
       return { success: true, count: defaults.length };
+    }),
+  }),
+
+  // ─── Check-in Router ───────────────────────────────────────────────────────
+  checkin: router({
+    // Generate QR Code for a registration
+    generate: adminProcedure.input(z.object({ registrationId: z.number() })).mutation(async ({ input }) => {
+      const { randomBytes } = await import("crypto");
+      const QRCode = await import("qrcode");
+      
+      // Check if already has a checkin
+      const existing = await getCheckinByRegistrationId(input.registrationId);
+      if (existing) {
+        return { checkin: existing, alreadyExists: true };
+      }
+      
+      // Generate unique token
+      const token = randomBytes(32).toString("hex");
+      
+      // Generate QR Code as data URL
+      const qrDataUrl = await QRCode.toDataURL(
+        JSON.stringify({ token, registrationId: input.registrationId, type: "legendarios_checkin" }),
+        { width: 400, margin: 2, color: { dark: "#000000", light: "#ffffff" } }
+      );
+      
+      const checkin = await createCheckin({
+        registrationId: input.registrationId,
+        qrCodeToken: token,
+        qrCodeDataUrl: qrDataUrl,
+      });
+      
+      return { checkin, alreadyExists: false };
+    }),
+
+    // Get checkin info by registration ID (for confirmation page)
+    getByRegistration: protectedProcedure.input(z.object({ registrationId: z.number() })).query(async ({ input }) => {
+      return getCheckinByRegistrationId(input.registrationId);
+    }),
+
+    // Validate QR Code and perform check-in
+    validate: protectedProcedure.input(z.object({ token: z.string() })).mutation(async ({ ctx, input }) => {
+      const checkin = await getCheckinByToken(input.token);
+      if (!checkin) {
+        return { success: false, error: "QR Code inv\u00e1lido. Token n\u00e3o encontrado.", checkin: null };
+      }
+      if (checkin.status === "checked_in") {
+        return { success: false, error: "Este participante j\u00e1 realizou o check-in.", checkin };
+      }
+      if (checkin.status === "cancelled") {
+        return { success: false, error: "Esta inscri\u00e7\u00e3o foi cancelada.", checkin: null };
+      }
+      
+      const updated = await performCheckin(input.token, ctx.user.id);
+      // Get registration details
+      const registration = await getRegistrationById(checkin.registrationId);
+      return { success: true, error: null, checkin: updated, registration };
+    }),
+
+    // Manual check-in by admin
+    manualCheckin: adminProcedure.input(z.object({ registrationId: z.number(), notes: z.string().optional() })).mutation(async ({ ctx, input }) => {
+      const result = await manualCheckin(input.registrationId, ctx.user.id, input.notes);
+      if (!result) {
+        return { success: false, error: "Inscri\u00e7\u00e3o n\u00e3o encontrada ou sem QR Code gerado." };
+      }
+      return { success: true, checkin: result };
+    }),
+
+    // Cancel a checkin
+    cancel: adminProcedure.input(z.object({ token: z.string() })).mutation(async ({ input }) => {
+      await cancelCheckin(input.token);
+      return { success: true };
+    }),
+
+    // List all check-ins (admin dashboard)
+    list: adminProcedure.query(async () => {
+      return getAllCheckins();
+    }),
+
+    // Get check-in stats
+    stats: adminProcedure.query(async () => {
+      return getCheckinStats();
+    }),
+
+    // Generate QR Codes in bulk for all confirmed registrations
+    generateBulk: adminProcedure.mutation(async () => {
+      const { randomBytes } = await import("crypto");
+      const QRCode = await import("qrcode");
+      const registrations = await getRegistrations();
+      const confirmed = registrations.filter((r: any) => r.status === "confirmed");
+      let generated = 0;
+      
+      for (const reg of confirmed) {
+        const existing = await getCheckinByRegistrationId(reg.id);
+        if (!existing) {
+          const token = randomBytes(32).toString("hex");
+          const qrDataUrl = await QRCode.toDataURL(
+            JSON.stringify({ token, registrationId: reg.id, type: "legendarios_checkin" }),
+            { width: 400, margin: 2, color: { dark: "#000000", light: "#ffffff" } }
+          );
+          await createCheckin({ registrationId: reg.id, qrCodeToken: token, qrCodeDataUrl: qrDataUrl });
+          generated++;
+        }
+      }
+      
+      return { success: true, generated, total: confirmed.length };
     }),
   }),
 });

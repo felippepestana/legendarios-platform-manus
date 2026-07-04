@@ -1,6 +1,6 @@
 import { eq, desc, and, like, SQL } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, leads, InsertLead, Lead, testimonials, appSettings, AppSetting, InsertAppSetting } from "../drizzle/schema";
+import { InsertUser, users, leads, InsertLead, Lead, testimonials, appSettings, AppSetting, InsertAppSetting, checkins, Checkin, InsertCheckin } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -390,4 +390,94 @@ export async function getWhatsAppConfig() {
   const verifyToken = await getSettingValue("whatsapp", "verify_token");
   const businessAccountId = await getSettingValue("whatsapp", "business_account_id");
   return { phoneNumberId, accessToken, verifyToken, businessAccountId };
+}
+
+
+// ─── Check-in Helpers ─────────────────────────────────────────────────────────
+
+export async function createCheckin(data: InsertCheckin): Promise<Checkin> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(checkins).values(data);
+  const [row] = await db.select().from(checkins).where(eq(checkins.id, result[0].insertId));
+  return row;
+}
+
+export async function getCheckinByToken(token: string): Promise<Checkin | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db.select().from(checkins).where(eq(checkins.qrCodeToken, token));
+  return row || null;
+}
+
+export async function getCheckinByRegistrationId(registrationId: number): Promise<Checkin | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [row] = await db.select().from(checkins).where(eq(checkins.registrationId, registrationId));
+  return row || null;
+}
+
+export async function performCheckin(token: string, checkedInBy: number): Promise<Checkin | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [existing] = await db.select().from(checkins).where(eq(checkins.qrCodeToken, token));
+  if (!existing) return null;
+  if (existing.status === "checked_in") return existing; // already checked in
+  
+  await db.update(checkins)
+    .set({ 
+      status: "checked_in", 
+      checkedInAt: new Date(), 
+      checkedInBy,
+      checkedInMethod: "qr_scan"
+    })
+    .where(eq(checkins.qrCodeToken, token));
+  
+  const [updated] = await db.select().from(checkins).where(eq(checkins.qrCodeToken, token));
+  return updated;
+}
+
+export async function manualCheckin(registrationId: number, checkedInBy: number, notes?: string): Promise<Checkin | null> {
+  const db = await getDb();
+  if (!db) return null;
+  const [existing] = await db.select().from(checkins).where(eq(checkins.registrationId, registrationId));
+  if (!existing) return null;
+  
+  await db.update(checkins)
+    .set({ 
+      status: "checked_in", 
+      checkedInAt: new Date(), 
+      checkedInBy,
+      checkedInMethod: "manual",
+      notes: notes || "Check-in manual pelo admin"
+    })
+    .where(eq(checkins.registrationId, registrationId));
+  
+  const [updated] = await db.select().from(checkins).where(eq(checkins.registrationId, registrationId));
+  return updated;
+}
+
+export async function cancelCheckin(token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(checkins)
+    .set({ status: "cancelled" })
+    .where(eq(checkins.qrCodeToken, token));
+}
+
+export async function getAllCheckins(): Promise<Checkin[]> {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(checkins).orderBy(desc(checkins.createdAt));
+}
+
+export async function getCheckinStats() {
+  const db = await getDb();
+  if (!db) return { total: 0, checkedIn: 0, pending: 0, cancelled: 0 };
+  const all = await db.select().from(checkins);
+  const total = all.length;
+  const checkedIn = all.filter(c => c.status === "checked_in").length;
+  const pending = all.filter(c => c.status === "pending").length;
+  const cancelled = all.filter(c => c.status === "cancelled").length;
+  return { total, checkedIn, pending, cancelled };
 }

@@ -262,3 +262,20 @@ export const appSettings = mysqlTable("app_settings", {
 });
 export type AppSetting = typeof appSettings.$inferSelect;
 export type InsertAppSetting = typeof appSettings.$inferInsert;
+
+// Check-ins - Controle de presença no evento via QR Code
+export const checkins = mysqlTable("checkins", {
+  id: int("id").autoincrement().primaryKey(),
+  registrationId: int("registrationId").notNull(),
+  qrCodeToken: varchar("qrCodeToken", { length: 64 }).notNull().unique(),
+  qrCodeDataUrl: text("qrCodeDataUrl"),
+  status: mysqlEnum("status", ["pending", "checked_in", "cancelled"]).default("pending").notNull(),
+  checkedInAt: timestamp("checkedInAt"),
+  checkedInBy: int("checkedInBy"),
+  checkedInMethod: mysqlEnum("checkedInMethod", ["qr_scan", "manual", "admin"]).default("qr_scan"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type Checkin = typeof checkins.$inferSelect;
+export type InsertCheckin = typeof checkins.$inferInsert;

@@ -117,3 +117,15 @@
 - [x] Distribuição por cidade e evolução temporal dos cadastros
 - [x] Cards de KPIs (total leads, total inscritos, taxa de conversão, mensagens enviadas)
 - [x] 74 testes passando (7 arquivos), 0 erros TypeScript
+
+## Sistema de Check-in com QR Code (Fase 6) - CONCLUÍDO
+- [x] Schema: tabela checkins (registration_id, qr_code_token, checked_in_at, checked_in_by)
+- [x] Instalar dependências: qrcode (geração) e html5-qrcode (leitor de câmera)
+- [x] Endpoint tRPC: gerar token único e QR Code na confirmação da inscrição
+- [x] Endpoint tRPC: validar QR Code e registrar check-in
+- [x] Endpoint tRPC: listar check-ins em tempo real (admin)
+- [x] Página de confirmação com QR Code exibido e opção de download/compartilhar
+- [x] Página /checkin/validar com leitor de câmera para escanear QR Code no evento
+- [x] Feedback visual na validação (sucesso com dados do participante, erro se já usado/inválido)
+- [x] Painel admin /admin/checkin com controle de presença em tempo real (total, presentes, ausentes)
+- [x] Testes automatizados para geração e validação de QR Code (93 testes, 8 arquivos)

@@ -15,6 +15,9 @@ import AdminWhatsApp from "./pages/AdminWhatsApp";
 import AdminLeads from "./pages/AdminLeads";
 import AdminConfiguracoes from "./pages/AdminConfiguracoes";
 import AdminMetricas from "./pages/AdminMetricas";
+import ConfirmacaoInscricao from "./pages/ConfirmacaoInscricao";
+import CheckinValidar from "./pages/CheckinValidar";
+import AdminCheckin from "./pages/AdminCheckin";
 
 function Router() {
   return (
@@ -30,6 +33,9 @@ function Router() {
       <Route path={"/admin/leads"} component={AdminLeads} />
       <Route path={"/admin/configuracoes"} component={AdminConfiguracoes} />
       <Route path={"/admin/metricas"} component={AdminMetricas} />
+      <Route path={"/inscricao/confirmacao/:id"} component={ConfirmacaoInscricao} />
+      <Route path={"/checkin/validar"} component={CheckinValidar} />
+      <Route path={"/admin/checkin"} component={AdminCheckin} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
